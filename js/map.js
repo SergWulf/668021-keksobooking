@@ -7,6 +7,10 @@ var MIN_COUNT_ROOMS = 1;
 var MAX_COUNT_ROOMS = 5;
 var MIN_COUNT_GUESTS = 1;
 var MAX_COUNT_GUESTS = 10;
+var MIN_COORDINATE_Y = 130;
+var MAX_COORDINATE_Y = 630;
+var MIN_COORDINATE_X = 0;
+var MAX_COORDINATE_X = document.querySelector('.map').clientWidth;
 
 var titlesResidence = [
   'Большая уютная квартира',
@@ -56,7 +60,7 @@ var realEstate = {
   }
 };
 
-// Функция перемешивания массива, благополучно взятая из харбра, по совету, чтобы не изобретать велосипед :)
+
 var randomLengthArray = function (array) {
   var newArray = [];
   var countElements = Math.round(Math.random() * array.length);
@@ -69,6 +73,7 @@ var randomLengthArray = function (array) {
   return newArray;
 };
 
+// Функция перемешивания массива, благополучно взятая из харбра, по совету, чтобы не изобретать велосипед :)
 var shuffle = function (arr) {
   var j;
   var temp;
@@ -85,12 +90,6 @@ var shuffle = function (arr) {
 var getRandomNumberRange = function (firstNumber, lastNumber) {
   return Math.round(Math.random() * (lastNumber - firstNumber) + firstNumber);
 };
-
-var buttonCheck = document.querySelector('.ad-form__submit');
-buttonCheck.addEventListener('click', function (evt) {
-  evt.preventDefault();
-  alert(randomLengthArray(shuffle(listFeatures)));
-});
 
 // Функция получения случайного элемента из массива
 var getRandomElementOfArray = function (listElements) {
@@ -136,6 +135,9 @@ var createRealEstates = function (count) {
     realEstate['offer']['features'] = randomLengthArray(shuffle(listFeatures));
     realEstate['offer']['description'] = '';
     realEstate['offer']['photos'] = shuffle(listPhotos);
+    realEstate['location']['x'] = getRandomNumberRange(MIN_COORDINATE_X, MAX_COORDINATE_X);
+    realEstate['location']['y'] = getRandomNumberRange(MIN_COORDINATE_Y, MAX_COORDINATE_Y);
+    realEstate['offer']['address'] = realEstate['location']['x'] + ', ' + realEstate['location']['y'];
     listRealEstate.push(JSON.parse(JSON.stringify(realEstate)));
   }
   return listRealEstate;
@@ -146,5 +148,15 @@ realEstates = createRealEstates(COUNT_REAL_ESATE);
 for (var i = 0; i < COUNT_REAL_ESATE; i++) {
   console.log(realEstates[i]['author']['avatar']);
   console.log(realEstates[i]['offer']['title']);
+  console.log(realEstates[i]['offer']['address']);
+  console.log(realEstates[i]['location']['x']);
+  console.log(realEstates[i]['location']['y']);
 }
+
+var buttonCheck = document.querySelector('.ad-form__submit');
+buttonCheck.addEventListener('click', function (evt) {
+  evt.preventDefault();
+
+});
+
 
