@@ -156,7 +156,9 @@ for (var i = 0; i < COUNT_REAL_ESATE; i++) {
 var buttonCheck = document.querySelector('.ad-form__submit');
 buttonCheck.addEventListener('click', function (evt) {
   evt.preventDefault();
-
 });
+
+var mapAdverts = document.querySelector('.map');
+mapAdverts.classList.remove('map--faded');
 
 
