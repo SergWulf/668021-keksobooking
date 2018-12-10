@@ -57,8 +57,19 @@ var realEstate = {
 };
 
 // Функция перемешивания массива, благополучно взятая из харбра, по совету, чтобы не изобретать велосипед :)
+var randomLengthArray = function (array) {
+  var newArray = [];
+  var countElements = Math.round(Math.random() * array.length);
+  if (countElements === 0) {
+    countElements = 1;
+  }
+  for (var i = 0; i < countElements; i++) {
+    newArray[i] = array[i];
+  }
+  return newArray;
+};
 
-var shuffle = function(arr){
+var shuffle = function (arr) {
   var j;
   var temp;
   for (var i = arr.length - 1; i > 0; i--){
@@ -78,7 +89,7 @@ var getRandomNumberRange = function (firstNumber, lastNumber) {
 var buttonCheck = document.querySelector('.ad-form__submit');
 buttonCheck.addEventListener('click', function (evt) {
   evt.preventDefault();
-  alert(getRandomNumberRange(1000, 1000000));
+  alert(randomLengthArray(shuffle(listFeatures)));
 });
 
 // Функция получения случайного элемента из массива
@@ -122,7 +133,7 @@ var createRealEstates = function (count) {
     realEstate['offer']['guests'] = getRandomNumberRange(MIN_COUNT_GUESTS, MAX_COUNT_GUESTS);
     realEstate['offer']['checkin'] = listCheckInOut[getRandomElementOfArray(listCheckInOut)];
     realEstate['offer']['checkout'] = listCheckInOut[getRandomElementOfArray(listCheckInOut)];
-    realEstate['offer']['features'] =
+    realEstate['offer']['features'] = randomLengthArray(shuffle(listFeatures));
     realEstate['offer']['description'] = '';
     realEstate['offer']['photos'] = shuffle(listPhotos);
     listRealEstate.push(JSON.parse(JSON.stringify(realEstate)));
