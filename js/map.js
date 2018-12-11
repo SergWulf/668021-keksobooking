@@ -161,4 +161,11 @@ buttonCheck.addEventListener('click', function (evt) {
 var mapAdverts = document.querySelector('.map');
 mapAdverts.classList.remove('map--faded');
 
+// Создаем шаблон для отображения метки на карте
+var pinTemplate = document.querySelector('#pin').content.querySelector('.map__pin');
+
+var renderPin = function (pin) {
+  
+};
+
 
