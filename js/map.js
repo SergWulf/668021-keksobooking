@@ -1,4 +1,4 @@
-'use strict'
+'use strict';
 
 var COUNT_REAL_ESATE = 8;
 var MIN_PRICE = 1000;
@@ -7,10 +7,13 @@ var MIN_COUNT_ROOMS = 1;
 var MAX_COUNT_ROOMS = 5;
 var MIN_COUNT_GUESTS = 1;
 var MAX_COUNT_GUESTS = 10;
-var MIN_COORDINATE_Y = 130;
-var MAX_COORDINATE_Y = 630;
-var MIN_COORDINATE_X = 0;
-var MAX_COORDINATE_X = document.querySelector('.map').clientWidth;
+var COORDINATE_PIN_X = 31;
+var COORDINATE_PIN_Y = 84;
+var MIN_COORDINATE_Y = 130 + COORDINATE_PIN_Y;
+var MAX_COORDINATE_Y = 630 - COORDINATE_PIN_Y;
+var MIN_COORDINATE_X = 0 + COORDINATE_PIN_X;
+var MAX_COORDINATE_X = document.querySelector('.map').clientWidth - COORDINATE_PIN_X;
+
 
 var titlesResidence = [
   'Большая уютная квартира',
@@ -77,7 +80,7 @@ var randomLengthArray = function (array) {
 var shuffle = function (arr) {
   var j;
   var temp;
-  for (var i = arr.length - 1; i > 0; i--){
+  for (var i = arr.length - 1; i > 0; i--) {
     j = Math.floor(Math.random() * (i + 1));
     temp = arr[j];
     arr[j] = arr[i];
@@ -142,21 +145,8 @@ var createRealEstates = function (count) {
   }
   return listRealEstate;
 };
-
+// Создание объектов JS на основе созданных данных
 realEstates = createRealEstates(COUNT_REAL_ESATE);
-
-for (var i = 0; i < COUNT_REAL_ESATE; i++) {
-  console.log(realEstates[i]['author']['avatar']);
-  console.log(realEstates[i]['offer']['title']);
-  console.log(realEstates[i]['offer']['address']);
-  console.log(realEstates[i]['location']['x']);
-  console.log(realEstates[i]['location']['y']);
-}
-
-var buttonCheck = document.querySelector('.ad-form__submit');
-buttonCheck.addEventListener('click', function (evt) {
-  evt.preventDefault();
-});
 
 var mapAdverts = document.querySelector('.map');
 mapAdverts.classList.remove('map--faded');
@@ -164,8 +154,25 @@ mapAdverts.classList.remove('map--faded');
 // Создаем шаблон для отображения метки на карте
 var pinTemplate = document.querySelector('#pin').content.querySelector('.map__pin');
 
-var renderPin = function (pin) {
-  
+var renderPin = function (realEstatePin) {
+  var pinElement = pinTemplate.cloneNode(true);
+  var pinPointerCoordinateX = Number(realEstatePin['location']['x']) - COORDINATE_PIN_X;
+  var pinPointerCoordianteY = Number(realEstatePin['location']['y']) - COORDINATE_PIN_Y;
+  pinElement.style = 'left: ' + pinPointerCoordinateX + 'px; top: ' + pinPointerCoordianteY + 'px;';
+  pinElement.querySelector('img').src = realEstatePin['author']['avatar'];
+  pinElement.querySelector('img').alt = realEstatePin['offer']['title'];
+  return pinElement;
 };
 
+var renderPins = function (realEstatesPin) {
+  var fragment = document.createDocumentFragment();
+  for (var j = 0; j < realEstatesPin.length; j++) {
+    fragment.appendChild(renderPin(realEstatesPin[j]));
+  }
+  return fragment;
+};
+
+// Находим блок, где будем отображать метки и отображаем их
+var blockPins = document.querySelector('.map__pins');
+blockPins.appendChild(renderPins(realEstates));
 
