@@ -5,8 +5,8 @@ var MIN_PRICE = 1000;
 var MAX_PRICE = 1000000;
 var MIN_COUNT_ROOMS = 1;
 var MAX_COUNT_ROOMS = 5;
-var MIN_COUNT_GUESTS = 1;
-var MAX_COUNT_GUESTS = 10;
+var MIN_COUNT_GUESTS = 2;
+var MAX_COUNT_GUESTS = 11;
 var COORDINATE_PIN_X = 31;
 var COORDINATE_PIN_Y = 84;
 var MIN_COORDINATE_Y = 130 + COORDINATE_PIN_Y;
@@ -129,7 +129,6 @@ var createRealEstates = function (count) {
     realEstate['author']['avatar'] = getPathImageAvatar(i + 1);
     realEstate['offer']['title'] = titlesResidence[i];
     realEstate['offer']['price'] = getRandomNumberRange(MIN_PRICE, MAX_PRICE);
-    realEstate['offer']['address'] = 'dumbum';
     realEstate['offer']['type'] = getTypeResidence(titlesResidence[i]);
     realEstate['offer']['rooms'] = getRandomNumberRange(MIN_COUNT_ROOMS, MAX_COUNT_ROOMS);
     realEstate['offer']['guests'] = getRandomNumberRange(MIN_COUNT_GUESTS, MAX_COUNT_GUESTS);
@@ -175,4 +174,75 @@ var renderPins = function (realEstatesPin) {
 // Находим блок, где будем отображать метки и отображаем их
 var blockPins = document.querySelector('.map__pins');
 blockPins.appendChild(renderPins(realEstates));
+
+// Создаем шаблон для отображения карточки объекта недвижимости
+var cardTemplate = document.querySelector('#card').content.querySelector('.map__card');
+
+// Функция перевода типа жилья на русский язык
+var getTranslateNameType = function (offerType) {
+  switch (offerType) {
+    case 'flat': return 'Квартира';
+    case 'house': return 'Дом';
+    case 'palace': return 'Дворец';
+    case 'bungalo': return 'Бунгало';
+    default: return 'unknown';
+
+  }
+};
+
+// Функция отображения карточки
+var renderCard = function (realEstateCard) {
+  var cardElement = cardTemplate.cloneNode(true);
+  cardElement.querySelector('.popup__title').textContent = realEstateCard['offer']['title'];
+  cardElement.querySelector('.popup__text--address').textContent = realEstateCard['offer']['address'];
+  cardElement.querySelector('.popup__text--price').innerHTML = realEstateCard['offer']['price'] + '&#x20bd;' + '<span>/ночь</span>';
+  cardElement.querySelector('.popup__type').textContent = getTranslateNameType(realEstateCard['offer']['type']);
+  cardElement.querySelector('.popup__text--capacity').textContent = realEstateCard['offer']['rooms'] + ' комнаты для ' + realEstateCard['offer']['guests'] + ' гостей';
+  cardElement.querySelector('.popup__text--time').textContent = 'Заезд после ' + realEstateCard['offer']['checkin'] + ', выездо до ' + realEstateCard['offer']['checkout'];
+  // В разметке есть все виды услуг. В массиве могут быть не все
+  // Чтобы отобразить нужные, необходимо перебрать элементы в разметке,
+  // если в разметке есть элемент, и такой элемент есть в массиве, то оставляем пункт разметки
+  // если в разметке есть элемент, а в массиве нет, то удаляем узел разметки
+  var popupFeatures = cardElement.querySelector('.popup__features');
+  var deleteFeatures = [];
+  for (var indexOne = 0; indexOne < popupFeatures.children.length; indexOne++) {
+    var isFeature = false;
+    for (var indexTwo = 0; indexTwo < realEstateCard['offer']['features'].length; indexTwo++) {
+      if ((popupFeatures.children[indexOne].className.indexOf('--' + realEstateCard['offer']['features'][indexTwo])) !== -1) {
+        isFeature = true;
+      }
+    }
+    if (!isFeature) {
+      deleteFeatures.push(popupFeatures.children[indexOne]);
+    }
+  }
+  // Удаляем ненужные виды услуг
+  for (var indexDeleteFeature = 0; indexDeleteFeature < deleteFeatures.length; indexDeleteFeature++) {
+    popupFeatures.removeChild(deleteFeatures[indexDeleteFeature]);
+  }
+  cardElement.querySelector('.popup__description').textContent = realEstateCard['offer']['description'];
+  // Добавляем фотографии в карточку объекта недвижимости
+  var popupPhotos = cardElement.querySelector('.popup__photos');
+  for (var j = 0; j < realEstateCard['offer']['photos'].length; j++) {
+    var popupPhoto = popupPhotos.querySelector('img').cloneNode(true);
+    popupPhoto.src = realEstateCard['offer']['photos'][j];
+    popupPhotos.appendChild(popupPhoto);
+  }
+  popupPhotos.removeChild(popupPhotos.children[0]);
+  cardElement.querySelector('.popup__avatar').src = realEstateCard['author']['avatar'];
+  return cardElement;
+};
+
+/*
+var renderCards = function (realEstatesCard) {
+  var fragment = document.createDocumentFragment();
+  for (var j = 0; j < realEstatesCard.length; j++) {
+    fragment.appendChild(renderCard(realEstatesCard[j]));
+  }
+  return fragment;
+};
+*/
+
+// Отображаем первую карточку
+mapAdverts.insertBefore(renderCard(realEstates[0]), mapAdverts.children[1]);
 
