@@ -40,6 +40,7 @@ var listPhotos = [
   'http://o0.github.io/assets/images/tokyo/hotel3.jpg'
 ];
 var realEstates = [];
+/*
 var realEstate = {
   'author': {
     'avatar': ''
@@ -62,7 +63,7 @@ var realEstate = {
     'y': ''
   }
 };
-
+*/
 
 var randomLengthArray = function (array) {
   var newArray = [];
@@ -124,6 +125,7 @@ var getPathImageAvatar = function (numberImage) {
 };
 
 var createRealEstates = function (count) {
+  var realEstate = {};
   var listRealEstate = [];
   for (var i = 0; i < count; i++) {
     realEstate['author']['avatar'] = getPathImageAvatar(i + 1);
