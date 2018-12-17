@@ -45,7 +45,7 @@ var typeResidence = {
   'house': 'Дом',
   'bungalo': 'Бунгало',
   'flat': 'Квартира'
-}
+};
 
 var realEstates = [];
 
@@ -92,23 +92,27 @@ var getPathImageAvatar = function (numberImage) {
 var createRealEstates = function (count) {
   var listRealEstate = [];
   for (var i = 0; i < count; i++) {
-    var realEstate = {};
-    realEstate['author'] = {};
-    realEstate['author']['avatar'] = getPathImageAvatar(i + 1);
-    realEstate['offer'] = {};
-    realEstate['offer']['title'] = titlesResidence[i];
-    realEstate['offer']['price'] = getRandomNumberRange(MIN_PRICE, MAX_PRICE);
-    realEstate['offer']['type'] = getTypeResidence(titlesResidence[i]);
-    realEstate['offer']['rooms'] = getRandomNumberRange(MIN_COUNT_ROOMS, MAX_COUNT_ROOMS);
-    realEstate['offer']['guests'] = getRandomNumberRange(MIN_COUNT_GUESTS, MAX_COUNT_GUESTS);
-    realEstate['offer']['checkin'] = listCheckInOut[getRandomElementOfArray(listCheckInOut)];
-    realEstate['offer']['checkout'] = listCheckInOut[getRandomElementOfArray(listCheckInOut)];
-    realEstate['offer']['features'] = shuffle(listFeatures).slice(Math.round(Math.random() * (listFeatures.length - 1)));
-    realEstate['offer']['description'] = '';
-    realEstate['offer']['photos'] = shuffle(listPhotos);
-    realEstate['location'] = {};
-    realEstate['location']['x'] = getRandomNumberRange(MIN_COORDINATE_X, MAX_COORDINATE_X);
-    realEstate['location']['y'] = getRandomNumberRange(MIN_COORDINATE_Y, MAX_COORDINATE_Y);
+    var realEstate = {
+      'author': {
+        'avatar': getPathImageAvatar(i + 1)
+      },
+      'offer': {
+        'title': titlesResidence[i],
+        'price': getRandomNumberRange(MIN_PRICE, MAX_PRICE),
+        'type': getTypeResidence(titlesResidence[i]),
+        'rooms': getRandomNumberRange(MIN_COUNT_ROOMS, MAX_COUNT_ROOMS),
+        'guests': getRandomNumberRange(MIN_COUNT_GUESTS, MAX_COUNT_GUESTS),
+        'checkin': listCheckInOut[getRandomElementOfArray(listCheckInOut)],
+        'checkout': listCheckInOut[getRandomElementOfArray(listCheckInOut)],
+        'features': shuffle(listFeatures).slice(Math.round(Math.random() * (listFeatures.length - 1))),
+        'description': '',
+        'photos': shuffle(listPhotos)
+      },
+      'location': {
+        'x': getRandomNumberRange(MIN_COORDINATE_X, MAX_COORDINATE_X),
+        'y': getRandomNumberRange(MIN_COORDINATE_Y, MAX_COORDINATE_Y)
+      },
+    };
     realEstate['offer']['address'] = realEstate['location']['x'] + ', ' + realEstate['location']['y'];
     listRealEstate.push(realEstate);
   }
@@ -116,10 +120,6 @@ var createRealEstates = function (count) {
 };
 // Создание объектов JS на основе созданных данных
 realEstates = createRealEstates(COUNT_REAL_ESATE);
-
-for (var i = 0; i < COUNT_REAL_ESATE; i++) {
-  console.log(realEstates[i]['offer']['type']);
-}
 
 var mapAdverts = document.querySelector('.map');
 mapAdverts.classList.remove('map--faded');
@@ -168,9 +168,9 @@ var renderCard = function (realEstateCard) {
     popupFeatures.removeChild(popupFeatures.firstChild);
   }
   // Добавляем нужные услуги в разметку
-  for (var j = 0; j < realEstateCard['offer']['features'].length; j++) {
+  for (var i = 0; i < realEstateCard['offer']['features'].length; i++) {
     var elementFeature = document.createElement('li');
-    elementFeature.className = 'popup__feature popup__feature--' + realEstateCard['offer']['features'][j];
+    elementFeature.className = 'popup__feature popup__feature--' + realEstateCard['offer']['features'][i];
     popupFeatures.appendChild(elementFeature);
   }
   cardElement.querySelector('.popup__description').textContent = realEstateCard['offer']['description'];
