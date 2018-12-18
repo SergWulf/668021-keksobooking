@@ -1,6 +1,5 @@
 'use strict';
 
-var COUNT_REAL_ESATE = 8;
 var MIN_PRICE = 1000;
 var MAX_PRICE = 1000000;
 var MIN_COUNT_ROOMS = 1;
@@ -13,7 +12,6 @@ var MIN_COORDINATE_Y = 130 + COORDINATE_PIN_Y;
 var MAX_COORDINATE_Y = 630 - COORDINATE_PIN_Y;
 var MIN_COORDINATE_X = 0 + COORDINATE_PIN_X;
 var MAX_COORDINATE_X = document.querySelector('.map').clientWidth - COORDINATE_PIN_X;
-
 
 var titlesResidence = [
   'Большая уютная квартира',
@@ -46,8 +44,6 @@ var typeResidence = {
   'bungalo': 'Бунгало',
   'flat': 'Квартира'
 };
-
-var realEstates = [];
 
 // Функция перемешивания массива, благополучно взятая из харбра, по совету, чтобы не изобретать велосипед :)
 var shuffle = function (arr) {
@@ -118,11 +114,6 @@ var createRealEstates = function (count) {
   }
   return listRealEstate;
 };
-// Создание объектов JS на основе созданных данных
-realEstates = createRealEstates(COUNT_REAL_ESATE);
-
-var mapAdverts = document.querySelector('.map');
-mapAdverts.classList.remove('map--faded');
 
 // Создаем шаблон для отображения метки на карте
 var pinTemplate = document.querySelector('#pin').content.querySelector('.map__pin');
@@ -145,9 +136,11 @@ var renderPins = function (realEstatesPin) {
   return fragment;
 };
 
+/*
 // Находим блок, где будем отображать метки и отображаем их
 var blockPins = document.querySelector('.map__pins');
 blockPins.appendChild(renderPins(realEstates));
+*/
 
 // Создаем шаблон для отображения карточки объекта недвижимости
 var cardTemplate = document.querySelector('#card').content.querySelector('.map__card');
@@ -197,5 +190,14 @@ var renderCards = function (realEstatesCard) {
 */
 
 // Отображаем первую карточку
+/*
 mapAdverts.insertBefore(renderCard(realEstates[0]), mapAdverts.children[1]);
+*/
+
+var formAd = document.querySelector('.ad-form');
+
+for (var i = 0; i < formAd.children.length; i++) {
+  formAd.children[i].setAttribute('disabled', 'disabled');
+}
+
 
