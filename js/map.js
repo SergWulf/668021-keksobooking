@@ -195,9 +195,29 @@ mapAdverts.insertBefore(renderCard(realEstates[0]), mapAdverts.children[1]);
 */
 
 var formAd = document.querySelector('.ad-form');
+var formFilters = document.querySelector('.map__filters');
 
 for (var i = 0; i < formAd.children.length; i++) {
   formAd.children[i].setAttribute('disabled', 'disabled');
 }
 
+var mapAdverts = document.querySelector('.map');
+var mapPin = document.querySelector('.map__pin');
+// Функция обработчик - переход в активное состояние карты.
+var buttonMouseUpHandler = function () {
+  mapAdverts.classList.remove('map--faded');
+  formAd.classList.remove('ad-form--disabled');
+  formFilters.classList.remove('ad-form--disabled');
+  for (var j = 0; j < formAd.children.length; j++) {
+    formAd.children[j].removeAttribute('disabled');
+  }
+};
+/*
+Блок с картой .map содержит класс map--faded;
+Форма заполнения информации об объявлении .ad-form содержит класс ad-form--disabled;
+Все <input> и <select> формы .ad-form заблокированы с помощью атрибута disabled, добавленного на них или на их родительские блоки fieldset.
+
+  Форма с фильтрами .map__filters заблокирована так же, как и форма .ad-form.
+*/
+mapPin.addEventListener('mouseup', buttonMouseUpHandler);
 
