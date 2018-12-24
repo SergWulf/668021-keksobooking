@@ -24,6 +24,7 @@ var titlesResidence = [
   'Уютное бунгало далеко от моря',
   'Неуютное бунгало по колено в воде'
 ];
+
 var listFeatures = [
   'wifi',
   'dishwasher',
@@ -32,12 +33,8 @@ var listFeatures = [
   'elevator',
   'conditioner'
 ];
+
 var listCheckInOut = ['12:00', '13:00', '14:00'];
-var listPhotos = [
-  'http://o0.github.io/assets/images/tokyo/hotel1.jpg',
-  'http://o0.github.io/assets/images/tokyo/hotel2.jpg',
-  'http://o0.github.io/assets/images/tokyo/hotel3.jpg'
-];
 
 var typeResidence = {
   'palace': 'Дворец',
@@ -89,6 +86,16 @@ var getPathImageAvatar = function (numberImage) {
 var createRealEstates = function (count) {
   var listRealEstate = [];
   for (var i = 0; i < count; i++) {
+    /* Не смог разобраться, почему определение listPhotos нужно именно здесь, а не "вверху" со всеми остальными
+    *  Если объявить со всеми остальными, функция shuffle(listPhotos) перемешивает один раз
+    *  Получается, что для всех 8 объектов список фотографий одинаковый
+    *  Если вставить определение здесь, то все ок
+    * */
+    var listPhotos = [
+      'http://o0.github.io/assets/images/tokyo/hotel1.jpg',
+      'http://o0.github.io/assets/images/tokyo/hotel2.jpg',
+      'http://o0.github.io/assets/images/tokyo/hotel3.jpg'
+    ];
     var realEstate = {
       'author': {
         'avatar': getPathImageAvatar(i + 1)
@@ -136,12 +143,6 @@ var renderPins = function (realEstatesPin) {
   }
   return fragment;
 };
-
-/*
-// Находим блок, где будем отображать метки и отображаем их
-var blockPins = document.querySelector('.map__pins');
-blockPins.appendChild(renderPins(realEstates));
-*/
 
 // Создаем шаблон для отображения карточки объекта недвижимости
 var cardTemplate = document.querySelector('#card').content.querySelector('.map__card');
@@ -203,8 +204,8 @@ for (var i = 0; i < formAd.children.length; i++) {
 }
 
 var mapAdverts = document.querySelector('.map');
-var mapPin = document.querySelector('.map__pin');
-// Функция обработчик - переход в активное состояние карты.
+var mapPin = document.querySelector('.map__pin--main');
+
 
 var realEstates = [];
 // Создание объектов JS на основе созданных данных
@@ -220,38 +221,30 @@ var buttonMouseUpHandler = function () {
   // Находим блок, где будем отображать метки и отображаем их
   var blockPins = document.querySelector('.map__pins');
   blockPins.appendChild(renderPins(realEstates));
-
-  // Отображаем первую карточку
-  mapAdverts.insertBefore(renderCard(realEstates[0]), mapAdverts.children[1]);
-
   // Задание 2. Узнать координаты метки.
   console.log('x - ' + mapPin.offsetLeft + ', y - ' + mapPin.offsetTop);
   // Узнать координаты первой метки
   // Вычислить координаты ее центра
   var leftMapPin = mapPin.offsetLeft + 31;
   var topMapPin = mapPin.offsetTop + 31;
-  formAd.querySelector('#address').setAttribute('value', leftMapPin + ', ' + topMapPin);
   // Записать данные координат в форму объявления
-
+  formAd.querySelector('#address').setAttribute('value', leftMapPin + ', ' + topMapPin);
 };
 
 mapPin.addEventListener('mouseup', buttonMouseUpHandler);
 
-
-//
 // Задание 3.
 // При клике на метку, отображать данные в карточке.
 // Используем делегирование
-// Находим карту
-// Обрезать
-//
-//
-//
+// Находим карту, находим метку, по порядковому номеру аватарки находим элемент массива, принадлежащий выбранному объекту
+// Отображаем актуальные данные метки
+
 mapAdverts.addEventListener('click', function (evt) {
   if ((evt.target.classList.contains('map__pin')) && (!evt.target.classList.contains('map__pin--main'))) {
-    alert(!evt.target.classList.contains('map__pin--main'));
+    if (mapAdverts.children[1].classList.contains('map__card')) {
+      mapAdverts.removeChild(mapAdverts.children[1]);
+    }
     var pathImg = evt.target.querySelector('img');
-    mapAdverts.removeChild(mapAdverts.children[1]);
     mapAdverts.insertBefore(renderCard(realEstates[(Number(pathImg.getAttribute('src').slice(16, -4)) - 1)]), mapAdverts.children[1]);
   }
 });
