@@ -222,7 +222,6 @@ var buttonMouseUpHandler = function () {
   var blockPins = document.querySelector('.map__pins');
   blockPins.appendChild(renderPins(realEstates));
   // Задание 2. Узнать координаты метки.
-  console.log('x - ' + mapPin.offsetLeft + ', y - ' + mapPin.offsetTop);
   // Узнать координаты первой метки
   // Вычислить координаты ее центра
   var leftMapPin = mapPin.offsetLeft + 31;
