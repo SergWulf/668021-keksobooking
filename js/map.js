@@ -1,5 +1,6 @@
 'use strict';
 
+var COUNT_REAL_ESATE = 8;
 var MIN_PRICE = 1000;
 var MAX_PRICE = 1000000;
 var MIN_COUNT_ROOMS = 1;
@@ -204,6 +205,11 @@ for (var i = 0; i < formAd.children.length; i++) {
 var mapAdverts = document.querySelector('.map');
 var mapPin = document.querySelector('.map__pin');
 // Функция обработчик - переход в активное состояние карты.
+
+var realEstates = [];
+// Создание объектов JS на основе созданных данных
+realEstates = createRealEstates(COUNT_REAL_ESATE);
+
 var buttonMouseUpHandler = function () {
   mapAdverts.classList.remove('map--faded');
   formAd.classList.remove('ad-form--disabled');
@@ -211,13 +217,43 @@ var buttonMouseUpHandler = function () {
   for (var j = 0; j < formAd.children.length; j++) {
     formAd.children[j].removeAttribute('disabled');
   }
-};
-/*
-Блок с картой .map содержит класс map--faded;
-Форма заполнения информации об объявлении .ad-form содержит класс ad-form--disabled;
-Все <input> и <select> формы .ad-form заблокированы с помощью атрибута disabled, добавленного на них или на их родительские блоки fieldset.
+  // Находим блок, где будем отображать метки и отображаем их
+  var blockPins = document.querySelector('.map__pins');
+  blockPins.appendChild(renderPins(realEstates));
 
-  Форма с фильтрами .map__filters заблокирована так же, как и форма .ad-form.
-*/
+  // Отображаем первую карточку
+  mapAdverts.insertBefore(renderCard(realEstates[0]), mapAdverts.children[1]);
+
+  // Задание 2. Узнать координаты метки.
+  console.log('x - ' + mapPin.offsetLeft + ', y - ' + mapPin.offsetTop);
+  // Узнать координаты первой метки
+  // Вычислить координаты ее центра
+  var leftMapPin = mapPin.offsetLeft + 31;
+  var topMapPin = mapPin.offsetTop + 31;
+  formAd.querySelector('#address').setAttribute('value', leftMapPin + ', ' + topMapPin);
+  // Записать данные координат в форму объявления
+
+};
+
 mapPin.addEventListener('mouseup', buttonMouseUpHandler);
+
+
+//
+// Задание 3.
+// При клике на метку, отображать данные в карточке.
+// Используем делегирование
+// Находим карту
+// Обрезать
+//
+//
+//
+mapAdverts.addEventListener('click', function (evt) {
+  if ((evt.target.classList.contains('map__pin')) && (!evt.target.classList.contains('map__pin--main'))) {
+    alert(!evt.target.classList.contains('map__pin--main'));
+    var pathImg = evt.target.querySelector('img');
+    mapAdverts.removeChild(mapAdverts.children[1]);
+    mapAdverts.insertBefore(renderCard(realEstates[(Number(pathImg.getAttribute('src').slice(16, -4)) - 1)]), mapAdverts.children[1]);
+  }
+});
+
 
