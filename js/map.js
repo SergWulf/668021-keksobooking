@@ -239,12 +239,19 @@ mapPin.addEventListener('mouseup', buttonMouseUpHandler);
 // Отображаем актуальные данные метки
 
 mapAdverts.addEventListener('click', function (evt) {
-  if ((evt.target.classList.contains('map__pin')) && (!evt.target.classList.contains('map__pin--main'))) {
-    if (mapAdverts.children[1].classList.contains('map__card')) {
-      mapAdverts.removeChild(mapAdverts.children[1]);
+  var target = evt.target;
+  while (target.tagName !== 'SECTION') {
+    if (target.tagName === 'BUTTON') {
+      if ((target.classList.contains('map__pin')) && (!target.classList.contains('map__pin--main'))) {
+        if (mapAdverts.children[1].classList.contains('map__card')) {
+          mapAdverts.removeChild(mapAdverts.children[1]);
+        }
+        var pathImg = target.querySelector('img');
+        mapAdverts.insertBefore(renderCard(realEstates[(Number(pathImg.getAttribute('src').slice(16, -4)) - 1)]), mapAdverts.children[1]);
+      }
+      return;
     }
-    var pathImg = evt.target.querySelector('img');
-    mapAdverts.insertBefore(renderCard(realEstates[(Number(pathImg.getAttribute('src').slice(16, -4)) - 1)]), mapAdverts.children[1]);
+    target = target.parentNode;
   }
 });
 
