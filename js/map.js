@@ -13,6 +13,10 @@ var MIN_COORDINATE_Y = 130 + COORDINATE_PIN_Y;
 var MAX_COORDINATE_Y = 630 - COORDINATE_PIN_Y;
 var MIN_COORDINATE_X = 0 + COORDINATE_PIN_X;
 var MAX_COORDINATE_X = document.querySelector('.map').clientWidth - COORDINATE_PIN_X;
+var HALF_WIDTH_MAIN_PIN = 31;
+var HALF_HEIGHT_MAIN_PIN = 31;
+var realEstates = [];
+
 
 var titlesResidence = [
   'Большая уютная квартира',
@@ -34,6 +38,12 @@ var listFeatures = [
   'conditioner'
 ];
 
+var listPhotos = [
+  'http://o0.github.io/assets/images/tokyo/hotel1.jpg',
+  'http://o0.github.io/assets/images/tokyo/hotel2.jpg',
+  'http://o0.github.io/assets/images/tokyo/hotel3.jpg'
+];
+
 var listCheckInOut = ['12:00', '13:00', '14:00'];
 
 var typeResidence = {
@@ -47,13 +57,14 @@ var typeResidence = {
 var shuffle = function (arr) {
   var j;
   var temp;
-  for (var i = arr.length - 1; i > 0; i--) {
+  var newArr = arr.slice();
+  for (var i = newArr.length - 1; i > 0; i--) {
     j = Math.floor(Math.random() * (i + 1));
-    temp = arr[j];
-    arr[j] = arr[i];
-    arr[i] = temp;
+    temp = newArr[j];
+    newArr[j] = newArr[i];
+    newArr[i] = temp;
   }
-  return arr;
+  return newArr;
 };
 
 // Функция получения случайного числа из положительного диапазона целых чисел
@@ -86,16 +97,6 @@ var getPathImageAvatar = function (numberImage) {
 var createRealEstates = function (count) {
   var listRealEstate = [];
   for (var i = 0; i < count; i++) {
-    /* Не смог разобраться, почему определение listPhotos нужно именно здесь, а не "вверху" со всеми остальными
-    *  Если объявить со всеми остальными, функция shuffle(listPhotos) перемешивает один раз
-    *  Получается, что для всех 8 объектов список фотографий одинаковый
-    *  Если вставить определение здесь, то все ок
-    * */
-    var listPhotos = [
-      'http://o0.github.io/assets/images/tokyo/hotel1.jpg',
-      'http://o0.github.io/assets/images/tokyo/hotel2.jpg',
-      'http://o0.github.io/assets/images/tokyo/hotel3.jpg'
-    ];
     var realEstate = {
       'author': {
         'avatar': getPathImageAvatar(i + 1)
@@ -206,11 +207,6 @@ for (var i = 0; i < formAd.children.length; i++) {
 var mapAdverts = document.querySelector('.map');
 var mapPin = document.querySelector('.map__pin--main');
 
-
-var realEstates = [];
-// Создание объектов JS на основе созданных данных
-realEstates = createRealEstates(COUNT_REAL_ESATE);
-
 var buttonMouseUpHandler = function () {
   mapAdverts.classList.remove('map--faded');
   formAd.classList.remove('ad-form--disabled');
@@ -218,40 +214,39 @@ var buttonMouseUpHandler = function () {
   for (var j = 0; j < formAd.children.length; j++) {
     formAd.children[j].removeAttribute('disabled');
   }
+  // Создание объектов JS на основе созданных данных
+  realEstates = createRealEstates(COUNT_REAL_ESATE);
   // Находим блок, где будем отображать метки и отображаем их
   var blockPins = document.querySelector('.map__pins');
   blockPins.appendChild(renderPins(realEstates));
   // Задание 2. Узнать координаты метки.
   // Узнать координаты первой метки
   // Вычислить координаты ее центра
-  var leftMapPin = mapPin.offsetLeft + 31;
-  var topMapPin = mapPin.offsetTop + 31;
+  var leftMapPin = mapPin.offsetLeft + HALF_WIDTH_MAIN_PIN;
+  var topMapPin = mapPin.offsetTop + HALF_HEIGHT_MAIN_PIN;
   // Записать данные координат в форму объявления
   formAd.querySelector('#address').setAttribute('value', leftMapPin + ', ' + topMapPin);
 };
 
 mapPin.addEventListener('mouseup', buttonMouseUpHandler);
 
-// Задание 3.
-// При клике на метку, отображать данные в карточке.
-// Используем делегирование
-// Находим карту, находим метку, по порядковому номеру аватарки находим элемент массива, принадлежащий выбранному объекту
-// Отображаем актуальные данные метки
-
 mapAdverts.addEventListener('click', function (evt) {
   var target = evt.target;
-  while (target.tagName !== 'SECTION') {
-    if (target.tagName === 'BUTTON') {
-      if ((target.classList.contains('map__pin')) && (!target.classList.contains('map__pin--main'))) {
-        if (mapAdverts.children[1].classList.contains('map__card')) {
-          mapAdverts.removeChild(mapAdverts.children[1]);
-        }
-        var pathImg = target.querySelector('img');
-        mapAdverts.insertBefore(renderCard(realEstates[(Number(pathImg.getAttribute('src').slice(16, -4)) - 1)]), mapAdverts.children[1]);
-      }
-      return;
-    }
+  if (target.tagName === 'IMG') {
     target = target.parentNode;
+  }
+  if ((target.classList.contains('map__pin')) && (!target.classList.contains('map__pin--main'))) {
+    if (mapAdverts.querySelector('.map__card')) {
+      mapAdverts.removeChild(mapAdverts.querySelector('.map__card'));
+    }
+    var pathImg = target.querySelector('img');
+    var collectionPins = document.querySelectorAll('.map__pin');
+    for (var key = 0; key < collectionPins.length; key++) {
+      if (pathImg.getAttribute('src') === collectionPins.item(key).children[0].getAttribute('src')) {
+        mapAdverts.insertBefore(renderCard(realEstates[key - 1]), mapAdverts.children[1]);
+        break;
+      }
+    }
   }
 });
 
