@@ -247,7 +247,10 @@ mapAdverts.addEventListener('click', function (evt) {
       mapAdverts.removeChild(mapAdverts.querySelector('.map__card'));
     }
     mapAdverts.insertBefore(renderCard(realEstates[target.dataset.index]), mapAdverts.children[1]);
+    var mapCard = document.querySelector('.map__card');
+    var closePopup = mapCard.querySelector('.popup__close');
+    closePopup.addEventListener('click', function () {
+      mapCard.classList.add('hidden');
+    });
   }
 });
-
-
