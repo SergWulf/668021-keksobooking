@@ -153,6 +153,7 @@ var cardTemplate = document.querySelector('#card').content.querySelector('.map__
 // Функция отображения карточки
 var renderCard = function (realEstateCard) {
   var cardElement = cardTemplate.cloneNode(true);
+  var closePopup = cardElement.querySelector('.popup__close');
   cardElement.querySelector('.popup__title').textContent = realEstateCard['offer']['title'];
   cardElement.querySelector('.popup__text--address').textContent = realEstateCard['offer']['address'];
   cardElement.querySelector('.popup__text--price').innerHTML = realEstateCard['offer']['price'] + '&#x20bd;' + '<span>/ночь</span>';
@@ -181,6 +182,9 @@ var renderCard = function (realEstateCard) {
   }
   popupPhotos.removeChild(popupPhotos.children[0]);
   cardElement.querySelector('.popup__avatar').src = realEstateCard['author']['avatar'];
+  closePopup.addEventListener('click', function () {
+    cardElement.classList.add('hidden');
+  });
   return cardElement;
 };
 
@@ -247,10 +251,5 @@ mapAdverts.addEventListener('click', function (evt) {
       mapAdverts.removeChild(mapAdverts.querySelector('.map__card'));
     }
     mapAdverts.insertBefore(renderCard(realEstates[target.dataset.index]), mapAdverts.children[1]);
-    var mapCard = document.querySelector('.map__card');
-    var closePopup = mapCard.querySelector('.popup__close');
-    closePopup.addEventListener('click', function () {
-      mapCard.classList.add('hidden');
-    });
   }
 });
