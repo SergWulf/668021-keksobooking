@@ -140,7 +140,9 @@ var renderPin = function (realEstatePin) {
 var renderPins = function (realEstatesPin) {
   var fragment = document.createDocumentFragment();
   for (var j = 0; j < realEstatesPin.length; j++) {
-    fragment.appendChild(renderPin(realEstatesPin[j]));
+    var newPinElement = renderPin(realEstatesPin[j]);
+    newPinElement.setAttribute('data-index', j);
+    fragment.appendChild(newPinElement);
   }
   return fragment;
 };
@@ -207,6 +209,15 @@ for (var i = 0; i < formAd.children.length; i++) {
 var mapAdverts = document.querySelector('.map');
 var mapPin = document.querySelector('.map__pin--main');
 
+var buttonMouseUpHandlerCreatePins = function () {
+  // Создание объектов JS на основе созданных данных
+  realEstates = createRealEstates(COUNT_REAL_ESATE);
+  // Находим блок, где будем отображать метки и отображаем их
+  var blockPins = document.querySelector('.map__pins');
+  blockPins.appendChild(renderPins(realEstates));
+  mapPin.removeEventListener('mouseup', buttonMouseUpHandlerCreatePins);
+};
+
 var buttonMouseUpHandler = function () {
   mapAdverts.classList.remove('map--faded');
   formAd.classList.remove('ad-form--disabled');
@@ -214,11 +225,6 @@ var buttonMouseUpHandler = function () {
   for (var j = 0; j < formAd.children.length; j++) {
     formAd.children[j].removeAttribute('disabled');
   }
-  // Создание объектов JS на основе созданных данных
-  realEstates = createRealEstates(COUNT_REAL_ESATE);
-  // Находим блок, где будем отображать метки и отображаем их
-  var blockPins = document.querySelector('.map__pins');
-  blockPins.appendChild(renderPins(realEstates));
   // Задание 2. Узнать координаты метки.
   // Узнать координаты первой метки
   // Вычислить координаты ее центра
@@ -228,6 +234,7 @@ var buttonMouseUpHandler = function () {
   formAd.querySelector('#address').setAttribute('value', leftMapPin + ', ' + topMapPin);
 };
 
+mapPin.addEventListener('mouseup', buttonMouseUpHandlerCreatePins);
 mapPin.addEventListener('mouseup', buttonMouseUpHandler);
 
 mapAdverts.addEventListener('click', function (evt) {
@@ -239,14 +246,7 @@ mapAdverts.addEventListener('click', function (evt) {
     if (mapAdverts.querySelector('.map__card')) {
       mapAdverts.removeChild(mapAdverts.querySelector('.map__card'));
     }
-    var pathImg = target.querySelector('img');
-    var collectionPins = document.querySelectorAll('.map__pin');
-    for (var key = 0; key < collectionPins.length; key++) {
-      if (pathImg.getAttribute('src') === collectionPins.item(key).children[0].getAttribute('src')) {
-        mapAdverts.insertBefore(renderCard(realEstates[key - 1]), mapAdverts.children[1]);
-        break;
-      }
-    }
+    mapAdverts.insertBefore(renderCard(realEstates[target.dataset.index]), mapAdverts.children[1]);
   }
 });
 
