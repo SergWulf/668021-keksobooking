@@ -13,6 +13,9 @@ var MIN_COORDINATE_Y = 130 + COORDINATE_PIN_Y;
 var MAX_COORDINATE_Y = 630 - COORDINATE_PIN_Y;
 var MIN_COORDINATE_X = 0 + COORDINATE_PIN_X;
 var MAX_COORDINATE_X = document.querySelector('.map').clientWidth - COORDINATE_PIN_X;
+var HALF_WIDTH_MAIN_PIN = 31;
+var HALF_HEIGHT_MAIN_PIN = 31;
+var realEstates = [];
 
 
 var titlesResidence = [
@@ -25,6 +28,7 @@ var titlesResidence = [
   'Уютное бунгало далеко от моря',
   'Неуютное бунгало по колено в воде'
 ];
+
 var listFeatures = [
   'wifi',
   'dishwasher',
@@ -33,12 +37,14 @@ var listFeatures = [
   'elevator',
   'conditioner'
 ];
-var listCheckInOut = ['12:00', '13:00', '14:00'];
+
 var listPhotos = [
   'http://o0.github.io/assets/images/tokyo/hotel1.jpg',
   'http://o0.github.io/assets/images/tokyo/hotel2.jpg',
   'http://o0.github.io/assets/images/tokyo/hotel3.jpg'
 ];
+
+var listCheckInOut = ['12:00', '13:00', '14:00'];
 
 var typeResidence = {
   'palace': 'Дворец',
@@ -47,19 +53,18 @@ var typeResidence = {
   'flat': 'Квартира'
 };
 
-var realEstates = [];
-
 // Функция перемешивания массива, благополучно взятая из харбра, по совету, чтобы не изобретать велосипед :)
 var shuffle = function (arr) {
   var j;
   var temp;
-  for (var i = arr.length - 1; i > 0; i--) {
+  var newArr = arr.slice();
+  for (var i = newArr.length - 1; i > 0; i--) {
     j = Math.floor(Math.random() * (i + 1));
-    temp = arr[j];
-    arr[j] = arr[i];
-    arr[i] = temp;
+    temp = newArr[j];
+    newArr[j] = newArr[i];
+    newArr[i] = temp;
   }
-  return arr;
+  return newArr;
 };
 
 // Функция получения случайного числа из положительного диапазона целых чисел
@@ -118,11 +123,6 @@ var createRealEstates = function (count) {
   }
   return listRealEstate;
 };
-// Создание объектов JS на основе созданных данных
-realEstates = createRealEstates(COUNT_REAL_ESATE);
-
-var mapAdverts = document.querySelector('.map');
-mapAdverts.classList.remove('map--faded');
 
 // Создаем шаблон для отображения метки на карте
 var pinTemplate = document.querySelector('#pin').content.querySelector('.map__pin');
@@ -140,14 +140,12 @@ var renderPin = function (realEstatePin) {
 var renderPins = function (realEstatesPin) {
   var fragment = document.createDocumentFragment();
   for (var j = 0; j < realEstatesPin.length; j++) {
-    fragment.appendChild(renderPin(realEstatesPin[j]));
+    var newPinElement = renderPin(realEstatesPin[j]);
+    newPinElement.setAttribute('data-index', j);
+    fragment.appendChild(newPinElement);
   }
   return fragment;
 };
-
-// Находим блок, где будем отображать метки и отображаем их
-var blockPins = document.querySelector('.map__pins');
-blockPins.appendChild(renderPins(realEstates));
 
 // Создаем шаблон для отображения карточки объекта недвижимости
 var cardTemplate = document.querySelector('#card').content.querySelector('.map__card');
@@ -155,6 +153,7 @@ var cardTemplate = document.querySelector('#card').content.querySelector('.map__
 // Функция отображения карточки
 var renderCard = function (realEstateCard) {
   var cardElement = cardTemplate.cloneNode(true);
+  var closePopup = cardElement.querySelector('.popup__close');
   cardElement.querySelector('.popup__title').textContent = realEstateCard['offer']['title'];
   cardElement.querySelector('.popup__text--address').textContent = realEstateCard['offer']['address'];
   cardElement.querySelector('.popup__text--price').innerHTML = realEstateCard['offer']['price'] + '&#x20bd;' + '<span>/ночь</span>';
@@ -183,6 +182,9 @@ var renderCard = function (realEstateCard) {
   }
   popupPhotos.removeChild(popupPhotos.children[0]);
   cardElement.querySelector('.popup__avatar').src = realEstateCard['author']['avatar'];
+  closePopup.addEventListener('click', function () {
+    cardElement.classList.add('hidden');
+  });
   return cardElement;
 };
 
@@ -197,5 +199,57 @@ var renderCards = function (realEstatesCard) {
 */
 
 // Отображаем первую карточку
+/*
 mapAdverts.insertBefore(renderCard(realEstates[0]), mapAdverts.children[1]);
+*/
 
+var formAd = document.querySelector('.ad-form');
+var formFilters = document.querySelector('.map__filters');
+
+for (var i = 0; i < formAd.children.length; i++) {
+  formAd.children[i].setAttribute('disabled', 'disabled');
+}
+
+var mapAdverts = document.querySelector('.map');
+var mapPin = document.querySelector('.map__pin--main');
+
+var buttonMouseUpHandlerCreatePins = function () {
+  // Создание объектов JS на основе созданных данных
+  realEstates = createRealEstates(COUNT_REAL_ESATE);
+  // Находим блок, где будем отображать метки и отображаем их
+  var blockPins = document.querySelector('.map__pins');
+  blockPins.appendChild(renderPins(realEstates));
+  mapPin.removeEventListener('mouseup', buttonMouseUpHandlerCreatePins);
+};
+
+var buttonMouseUpHandler = function () {
+  mapAdverts.classList.remove('map--faded');
+  formAd.classList.remove('ad-form--disabled');
+  formFilters.classList.remove('ad-form--disabled');
+  for (var j = 0; j < formAd.children.length; j++) {
+    formAd.children[j].removeAttribute('disabled');
+  }
+  // Задание 2. Узнать координаты метки.
+  // Узнать координаты первой метки
+  // Вычислить координаты ее центра
+  var leftMapPin = mapPin.offsetLeft + HALF_WIDTH_MAIN_PIN;
+  var topMapPin = mapPin.offsetTop + HALF_HEIGHT_MAIN_PIN;
+  // Записать данные координат в форму объявления
+  formAd.querySelector('#address').setAttribute('value', leftMapPin + ', ' + topMapPin);
+};
+
+mapPin.addEventListener('mouseup', buttonMouseUpHandlerCreatePins);
+mapPin.addEventListener('mouseup', buttonMouseUpHandler);
+
+mapAdverts.addEventListener('click', function (evt) {
+  var target = evt.target;
+  if (target.tagName === 'IMG') {
+    target = target.parentNode;
+  }
+  if ((target.classList.contains('map__pin')) && (!target.classList.contains('map__pin--main'))) {
+    if (mapAdverts.querySelector('.map__card')) {
+      mapAdverts.removeChild(mapAdverts.querySelector('.map__card'));
+    }
+    mapAdverts.insertBefore(renderCard(realEstates[target.dataset.index]), mapAdverts.children[1]);
+  }
+});
