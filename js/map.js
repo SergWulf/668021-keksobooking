@@ -53,6 +53,26 @@ var typeResidence = {
   'flat': 'Квартира'
 };
 
+var typeResidencePrice = {
+  'palace': 10000,
+  'house': 5000,
+  'bungalo': 0,
+  'flat': 1000
+};
+
+var associationRoomsGuests = {
+  '1': ['1'],
+  '2': ['1', '2'],
+  '3': ['1', '2', '3'],
+  '100': ['0']
+};
+
+var associationGuestsRooms = {
+  '0': ['100'],
+  '1': ['1', '2', '3'],
+  '2': ['2', '3'],
+  '3': ['3']
+};
 // Функция перемешивания массива, благополучно взятая из харбра, по совету, чтобы не изобретать велосипед :)
 var shuffle = function (arr) {
   var j;
@@ -253,3 +273,102 @@ mapAdverts.addEventListener('click', function (evt) {
     mapAdverts.insertBefore(renderCard(realEstates[target.dataset.index]), mapAdverts.children[1]);
   }
 });
+
+// Добавляем необходимые атрибуты полю 'Заголовок'
+var inputTitle = document.querySelector('#title');
+inputTitle.setAttribute('required', 'required');
+inputTitle.setAttribute('minlength', '30');
+inputTitle.setAttribute('maxlength', '100');
+
+// Добавляем необходимые атрибуты полю 'Цена'
+var inputPrice = document.querySelector('#price');
+inputPrice.setAttribute('required', 'required');
+inputPrice.setAttribute('max', '1000000');
+
+// Добавляем необходимые атрибуты полу 'Адрес'
+var inputAddress = document.querySelector('#address');
+inputAddress.setAttribute('readonly', 'true');
+
+// Функция валидации соответствия: вид жительста - минимальная цена
+//     «Бунгало» — минимальная цена за ночь 0;
+//     «Квартира» — минимальная цена за ночь 1 000;
+//     «Дом» — минимальная цена 5 000;
+//     «Дворец» — минимальная цена 10 000;
+// Вместе с минимальным значением цены нужно изменять и плейсхолдер.
+var typeOfHouse = document.querySelector('#type');
+// Обработка первоначального значения формы
+inputPrice.setAttribute('min', typeResidencePrice[typeOfHouse.options[typeOfHouse.selectedIndex].value]);
+inputPrice.setAttribute('placeholder', typeResidencePrice[typeOfHouse.options[typeOfHouse.selectedIndex].value]);
+
+typeOfHouse.addEventListener('change', function (evt) {
+  inputPrice.setAttribute('min', typeResidencePrice[typeOfHouse.options[evt.currentTarget.selectedIndex].value]);
+  inputPrice.setAttribute('placeholder', typeResidencePrice[typeOfHouse.options[evt.currentTarget.selectedIndex].value]);
+});
+
+// Валидация полей заезды и выезда
+// Поля «Время заезда» и «Время выезда» синхронизированы:
+// при изменении значения одного поля, во втором выделяется соответствующее ему.
+// Например, если время заезда указано «после 14», то время выезда будет равно «до 14» и наоборот.
+//
+// 1. Обработка события на каждом поле
+// 2. Если одно поле принимает определенное значение, то и другое поле, послы выбора значения, принимает тоже значение
+var timeIn = document.querySelector('#timein');
+var timeOut = document.querySelector('#timeout');
+var validationTime = function (evt) {
+  if (evt.currentTarget.name === 'timeout') {
+    timeIn.options.selectedIndex = timeOut.options.selectedIndex;
+  } else {
+    timeOut.options.selectedIndex = timeIn.options.selectedIndex;
+  }
+};
+
+timeIn.addEventListener('change', validationTime, false);
+timeOut.addEventListener('change', validationTime, false);
+
+// Функция валидации соответствия: полей "вид жительства" - "кол-во комнат".
+//     1 комната — «для 1 гостя»;
+//     2 комнаты — «для 2 гостей» или «для 1 гостя»;
+//     3 комнаты — «для 3 гостей», «для 2 гостей» или «для 1 гостя»;
+//     100 комнат — «не для гостей»;
+var roomNumber = document.querySelector('#room_number');
+var capacity = document.querySelector('#capacity');
+
+var validationGuestsInRoom = function (evt) {
+  // Проверяем, какая комната выбрана
+  // Проверяем поле количество гостей
+  if (evt.currentTarget.name === 'capacity') {
+    if ((associationGuestsRooms[evt.currentTarget.options[evt.currentTarget.selectedIndex].value].indexOf(roomNumber.options[roomNumber.selectedIndex].value)) !== -1) {
+      evt.currentTarget.setCustomValidity('');
+      roomNumber.setCustomValidity('');
+    } else {
+      evt.currentTarget.setCustomValidity('Количество гостей не соответствует количеству комнат: 1 комната - 1 гость, 2 комнаты - 1 или 2 гостя, 3 комнаты - 1, 2 или 3 гостя, 100 комнат - не для гостей');
+    }
+  }
+  if (evt.currentTarget.name === 'rooms') {
+    if ((associationRoomsGuests[evt.currentTarget.options[evt.currentTarget.selectedIndex].value].indexOf(capacity.options[capacity.selectedIndex].value)) !== -1) {
+      evt.currentTarget.setCustomValidity('');
+      capacity.setCustomValidity('');
+    } else {
+      evt.currentTarget.setCustomValidity('Количество гостей не соответствует количеству комнат: 1 комната - 1 гость, 2 комнаты - 1 или 2 гостя, 3 комнаты - 1, 2 или 3 гостя, 100 комнат - не для гостей');
+    }
+  }
+};
+
+// первоначальная валидация значений формы по умолчанию, без обработчиков событий, не очень понятно как избавиться от дублирования кода функции validationGuestsRooms
+if ((associationGuestsRooms[capacity.options[capacity.selectedIndex].value].indexOf(roomNumber.options[roomNumber.selectedIndex].value)) !== -1) {
+  capacity.setCustomValidity('');
+  roomNumber.setCustomValidity('');
+} else {
+  capacity.setCustomValidity('Количество гостей не соответствует количеству комнат: 1 комната - 1 гость, 2 комнаты - 1 или 2 гостя, 3 комнаты - 1, 2 или 3 гостя, 100 комнат - не для гостей');
+}
+
+if ((associationRoomsGuests[roomNumber.options[roomNumber.selectedIndex].value].indexOf(capacity.options[capacity.selectedIndex].value)) !== -1) {
+  roomNumber.setCustomValidity('');
+  capacity.setCustomValidity('');
+} else {
+  roomNumber.setCustomValidity('Количество гостей не соответствует количеству комнат: 1 комната - 1 гость, 2 комнаты - 1 или 2 гостя, 3 комнаты - 1, 2 или 3 гостя, 100 комнат - не для гостей');
+}
+
+roomNumber.addEventListener('change', validationGuestsInRoom, false);
+capacity.addEventListener('change', validationGuestsInRoom, false);
+
