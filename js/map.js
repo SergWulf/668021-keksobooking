@@ -16,6 +16,8 @@ var MAX_COORDINATE_X = document.querySelector('.map').clientWidth - COORDINATE_P
 var HALF_WIDTH_MAIN_PIN = 31;
 var HALF_HEIGHT_MAIN_PIN = 31;
 var realEstates = [];
+var MAX_ROOMS = 100;
+var MAX_GUESTS = 0;
 
 
 var titlesResidence = [
@@ -60,19 +62,6 @@ var typeResidencePrice = {
   'flat': 1000
 };
 
-var associationRoomsGuests = {
-  '1': ['1'],
-  '2': ['1', '2'],
-  '3': ['1', '2', '3'],
-  '100': ['0']
-};
-
-var associationGuestsRooms = {
-  '0': ['100'],
-  '1': ['1', '2', '3'],
-  '2': ['2', '3'],
-  '3': ['3']
-};
 // Функция перемешивания массива, благополучно взятая из харбра, по совету, чтобы не изобретать велосипед :)
 var shuffle = function (arr) {
   var j;
@@ -274,21 +263,6 @@ mapAdverts.addEventListener('click', function (evt) {
   }
 });
 
-// Добавляем необходимые атрибуты полю 'Заголовок'
-var inputTitle = document.querySelector('#title');
-inputTitle.setAttribute('required', 'required');
-inputTitle.setAttribute('minlength', '30');
-inputTitle.setAttribute('maxlength', '100');
-
-// Добавляем необходимые атрибуты полю 'Цена'
-var inputPrice = document.querySelector('#price');
-inputPrice.setAttribute('required', 'required');
-inputPrice.setAttribute('max', '1000000');
-
-// Добавляем необходимые атрибуты полу 'Адрес'
-var inputAddress = document.querySelector('#address');
-inputAddress.setAttribute('readonly', 'true');
-
 // Функция валидации соответствия: вид жительста - минимальная цена
 //     «Бунгало» — минимальная цена за ночь 0;
 //     «Квартира» — минимальная цена за ночь 1 000;
@@ -337,36 +311,56 @@ var validationGuestsInRoom = function (evt) {
   // Проверяем, какая комната выбрана
   // Проверяем поле количество гостей
   if (evt.currentTarget.name === 'capacity') {
-    if ((associationGuestsRooms[evt.currentTarget.options[evt.currentTarget.selectedIndex].value].indexOf(roomNumber.options[roomNumber.selectedIndex].value)) !== -1) {
-      evt.currentTarget.setCustomValidity('');
-      roomNumber.setCustomValidity('');
+    if ((Number(evt.currentTarget.options[evt.currentTarget.selectedIndex].value) !== MAX_GUESTS) && (Number(roomNumber.options[roomNumber.selectedIndex].value) !== MAX_ROOMS)) {
+      if (evt.currentTarget.options[evt.currentTarget.selectedIndex].value <= roomNumber.options[roomNumber.selectedIndex].value) {
+        evt.currentTarget.setCustomValidity('');
+        roomNumber.setCustomValidity('');
+      } else {
+        evt.currentTarget.setCustomValidity('Количество гостей не соответствует количеству комнат: 1 комната - 1 гость, 2 комнаты - 1 или 2 гостя, 3 комнаты - 1, 2 или 3 гостя, 100 комнат - не для гостей');
+      }
     } else {
-      evt.currentTarget.setCustomValidity('Количество гостей не соответствует количеству комнат: 1 комната - 1 гость, 2 комнаты - 1 или 2 гостя, 3 комнаты - 1, 2 или 3 гостя, 100 комнат - не для гостей');
+      if ((Number(evt.currentTarget.options[evt.currentTarget.selectedIndex].value) === MAX_GUESTS) && (Number(roomNumber.options[roomNumber.selectedIndex].value) === MAX_ROOMS)) {
+        evt.currentTarget.setCustomValidity('');
+        roomNumber.setCustomValidity('');
+      } else {
+        evt.currentTarget.setCustomValidity('Количество гостей не соответствует количеству комнат: 1 комната - 1 гость, 2 комнаты - 1 или 2 гостя, 3 комнаты - 1, 2 или 3 гостя, 100 комнат - не для гостей');
+      }
     }
   }
   if (evt.currentTarget.name === 'rooms') {
-    if ((associationRoomsGuests[evt.currentTarget.options[evt.currentTarget.selectedIndex].value].indexOf(capacity.options[capacity.selectedIndex].value)) !== -1) {
-      evt.currentTarget.setCustomValidity('');
-      capacity.setCustomValidity('');
+    if ((Number(evt.currentTarget.options[evt.currentTarget.selectedIndex].value) !== MAX_ROOMS) && (Number(capacity.options[capacity.selectedIndex].value) !== MAX_GUESTS)) {
+      if (evt.currentTarget.options[evt.currentTarget.selectedIndex].value >= capacity.options[capacity.selectedIndex].value) {
+        evt.currentTarget.setCustomValidity('');
+        capacity.setCustomValidity('');
+      } else {
+        evt.currentTarget.setCustomValidity('Количество гостей не соответствует количеству комнат: 1 комната - 1 гость, 2 комнаты - 1 или 2 гостя, 3 комнаты - 1, 2 или 3 гостя, 100 комнат - не для гостей');
+      }
     } else {
-      evt.currentTarget.setCustomValidity('Количество гостей не соответствует количеству комнат: 1 комната - 1 гость, 2 комнаты - 1 или 2 гостя, 3 комнаты - 1, 2 или 3 гостя, 100 комнат - не для гостей');
+      if ((Number(evt.currentTarget.options[evt.currentTarget.selectedIndex].value) === MAX_ROOMS) && (Number(capacity.options[capacity.selectedIndex].value) === MAX_GUESTS)) {
+        evt.currentTarget.setCustomValidity('');
+        capacity.setCustomValidity('');
+      } else {
+        evt.currentTarget.setCustomValidity('Количество гостей не соответствует количеству комнат: 1 комната - 1 гость, 2 комнаты - 1 или 2 гостя, 3 комнаты - 1, 2 или 3 гостя, 100 комнат - не для гостей');
+      }
     }
   }
 };
 
 // первоначальная валидация значений формы по умолчанию, без обработчиков событий, не очень понятно как избавиться от дублирования кода функции validationGuestsRooms
-if ((associationGuestsRooms[capacity.options[capacity.selectedIndex].value].indexOf(roomNumber.options[roomNumber.selectedIndex].value)) !== -1) {
-  capacity.setCustomValidity('');
-  roomNumber.setCustomValidity('');
+if ((Number(roomNumber.options[roomNumber.selectedIndex].value) !== MAX_ROOMS) && (Number(capacity.options[capacity.selectedIndex].value) !== MAX_GUESTS)) {
+  if (roomNumber.options[roomNumber.selectedIndex].value >= capacity.options[capacity.selectedIndex].value) {
+    roomNumber.setCustomValidity('');
+    capacity.setCustomValidity('');
+  } else {
+    roomNumber.setCustomValidity('Количество гостей не соответствует количеству комнат: 1 комната - 1 гость, 2 комнаты - 1 или 2 гостя, 3 комнаты - 1, 2 или 3 гостя, 100 комнат - не для гостей');
+  }
 } else {
-  capacity.setCustomValidity('Количество гостей не соответствует количеству комнат: 1 комната - 1 гость, 2 комнаты - 1 или 2 гостя, 3 комнаты - 1, 2 или 3 гостя, 100 комнат - не для гостей');
-}
-
-if ((associationRoomsGuests[roomNumber.options[roomNumber.selectedIndex].value].indexOf(capacity.options[capacity.selectedIndex].value)) !== -1) {
-  roomNumber.setCustomValidity('');
-  capacity.setCustomValidity('');
-} else {
-  roomNumber.setCustomValidity('Количество гостей не соответствует количеству комнат: 1 комната - 1 гость, 2 комнаты - 1 или 2 гостя, 3 комнаты - 1, 2 или 3 гостя, 100 комнат - не для гостей');
+  if ((Number(capacity.options[capacity.currentTarget.selectedIndex].value) === MAX_GUESTS) && (Number(roomNumber.options[roomNumber.selectedIndex].value) === MAX_ROOMS)) {
+    capacity.setCustomValidity('');
+    roomNumber.setCustomValidity('');
+  } else {
+    roomNumber.setCustomValidity('Количество гостей не соответствует количеству комнат: 1 комната - 1 гость, 2 комнаты - 1 или 2 гостя, 3 комнаты - 1, 2 или 3 гостя, 100 комнат - не для гостей');
+  }
 }
 
 roomNumber.addEventListener('change', validationGuestsInRoom, false);
