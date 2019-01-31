@@ -270,6 +270,7 @@ mapAdverts.addEventListener('click', function (evt) {
 //     «Дворец» — минимальная цена 10 000;
 // Вместе с минимальным значением цены нужно изменять и плейсхолдер.
 var typeOfHouse = document.querySelector('#type');
+var inputPrice = document.querySelector('#price');
 // Обработка первоначального значения формы
 inputPrice.setAttribute('min', typeResidencePrice[typeOfHouse.options[typeOfHouse.selectedIndex].value]);
 inputPrice.setAttribute('placeholder', typeResidencePrice[typeOfHouse.options[typeOfHouse.selectedIndex].value]);
@@ -308,61 +309,26 @@ var roomNumber = document.querySelector('#room_number');
 var capacity = document.querySelector('#capacity');
 
 var validationGuestsInRoom = function (evt) {
-  // Проверяем, какая комната выбрана
-  // Проверяем поле количество гостей
-  if (evt.currentTarget.name === 'capacity') {
-    if ((Number(evt.currentTarget.options[evt.currentTarget.selectedIndex].value) !== MAX_GUESTS) && (Number(roomNumber.options[roomNumber.selectedIndex].value) !== MAX_ROOMS)) {
-      if (evt.currentTarget.options[evt.currentTarget.selectedIndex].value <= roomNumber.options[roomNumber.selectedIndex].value) {
-        evt.currentTarget.setCustomValidity('');
-        roomNumber.setCustomValidity('');
-      } else {
-        evt.currentTarget.setCustomValidity('Количество гостей не соответствует количеству комнат: 1 комната - 1 гость, 2 комнаты - 1 или 2 гостя, 3 комнаты - 1, 2 или 3 гостя, 100 комнат - не для гостей');
-      }
-    } else {
-      if ((Number(evt.currentTarget.options[evt.currentTarget.selectedIndex].value) === MAX_GUESTS) && (Number(roomNumber.options[roomNumber.selectedIndex].value) === MAX_ROOMS)) {
-        evt.currentTarget.setCustomValidity('');
-        roomNumber.setCustomValidity('');
-      } else {
-        evt.currentTarget.setCustomValidity('Количество гостей не соответствует количеству комнат: 1 комната - 1 гость, 2 комнаты - 1 или 2 гостя, 3 комнаты - 1, 2 или 3 гостя, 100 комнат - не для гостей');
-      }
-    }
+  // Сразу записываем сообщения об несоответствии комнат и гостей, в дальнейшем эти значения примут истинные значения
+  roomNumber.setCustomValidity('Количество гостей не соответствует количеству комнат: 1 комната - 1 гость, 2 комнаты - 1 или 2 гостя, 3 комнаты - 1, 2 или 3 гостя, 100 комнат - не для гостей');
+  capacity.setCustomValidity('Количество гостей не соответствует количеству комнат: 1 комната - 1 гость, 2 комнаты - 1 или 2 гостя, 3 комнаты - 1, 2 или 3 гостя, 100 комнат - не для гостей');
+  // Записываем значения условия в переменную (здесь условие, проверяющие, что нету не стандартных значений в комнатах и кол-ве гостей
+  var expressionWithoutMaxValue = ((Number(roomNumber.options[roomNumber.selectedIndex].value) !== MAX_ROOMS) && (Number(capacity.options[capacity.selectedIndex].value) !== MAX_GUESTS));
+  // Здесь условие, что выбраны именно не стандартные значения комнат и гостей: 100 и 0;
+  var expressionWithMaxValue = ((Number(capacity.options[capacity.selectedIndex].value) === MAX_GUESTS) && (Number(roomNumber.options[roomNumber.selectedIndex].value) === MAX_ROOMS));
+  // Переменная, которая хранит условие проверки соответсвия гостей - комнатам, либо комнат - гостям.
+  var currentExpressionCondition = (roomNumber.options[roomNumber.selectedIndex].value >= capacity.options[capacity.selectedIndex].value);
+  if ((Boolean(evt)) && (evt.currentTarget.name === 'capacity')) {
+    currentExpressionCondition = (capacity.options[capacity.selectedIndex].value <= roomNumber.options[roomNumber.selectedIndex].value);
   }
-  if (evt.currentTarget.name === 'rooms') {
-    if ((Number(evt.currentTarget.options[evt.currentTarget.selectedIndex].value) !== MAX_ROOMS) && (Number(capacity.options[capacity.selectedIndex].value) !== MAX_GUESTS)) {
-      if (evt.currentTarget.options[evt.currentTarget.selectedIndex].value >= capacity.options[capacity.selectedIndex].value) {
-        evt.currentTarget.setCustomValidity('');
-        capacity.setCustomValidity('');
-      } else {
-        evt.currentTarget.setCustomValidity('Количество гостей не соответствует количеству комнат: 1 комната - 1 гость, 2 комнаты - 1 или 2 гостя, 3 комнаты - 1, 2 или 3 гостя, 100 комнат - не для гостей');
-      }
-    } else {
-      if ((Number(evt.currentTarget.options[evt.currentTarget.selectedIndex].value) === MAX_ROOMS) && (Number(capacity.options[capacity.selectedIndex].value) === MAX_GUESTS)) {
-        evt.currentTarget.setCustomValidity('');
-        capacity.setCustomValidity('');
-      } else {
-        evt.currentTarget.setCustomValidity('Количество гостей не соответствует количеству комнат: 1 комната - 1 гость, 2 комнаты - 1 или 2 гостя, 3 комнаты - 1, 2 или 3 гостя, 100 комнат - не для гостей');
-      }
-    }
+  // Основная проверка соответствия комнат гостям
+  if ((expressionWithoutMaxValue && currentExpressionCondition) || (expressionWithMaxValue)) {
+    roomNumber.setCustomValidity('');
+    capacity.setCustomValidity('');
   }
 };
 
-// первоначальная валидация значений формы по умолчанию, без обработчиков событий, не очень понятно как избавиться от дублирования кода функции validationGuestsRooms
-if ((Number(roomNumber.options[roomNumber.selectedIndex].value) !== MAX_ROOMS) && (Number(capacity.options[capacity.selectedIndex].value) !== MAX_GUESTS)) {
-  if (roomNumber.options[roomNumber.selectedIndex].value >= capacity.options[capacity.selectedIndex].value) {
-    roomNumber.setCustomValidity('');
-    capacity.setCustomValidity('');
-  } else {
-    roomNumber.setCustomValidity('Количество гостей не соответствует количеству комнат: 1 комната - 1 гость, 2 комнаты - 1 или 2 гостя, 3 комнаты - 1, 2 или 3 гостя, 100 комнат - не для гостей');
-  }
-} else {
-  if ((Number(capacity.options[capacity.currentTarget.selectedIndex].value) === MAX_GUESTS) && (Number(roomNumber.options[roomNumber.selectedIndex].value) === MAX_ROOMS)) {
-    capacity.setCustomValidity('');
-    roomNumber.setCustomValidity('');
-  } else {
-    roomNumber.setCustomValidity('Количество гостей не соответствует количеству комнат: 1 комната - 1 гость, 2 комнаты - 1 или 2 гостя, 3 комнаты - 1, 2 или 3 гостя, 100 комнат - не для гостей');
-  }
-}
-
+validationGuestsInRoom(false);
 roomNumber.addEventListener('change', validationGuestsInRoom, false);
 capacity.addEventListener('change', validationGuestsInRoom, false);
 
