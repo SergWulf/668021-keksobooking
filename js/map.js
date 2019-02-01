@@ -18,6 +18,7 @@ var HALF_HEIGHT_MAIN_PIN = 31;
 var realEstates = [];
 var MAX_ROOMS = 100;
 var MAX_GUESTS = 0;
+var MESSAGE_ERROR_VALIDATION = 'Количество гостей не соответствует количеству комнат: 1 комната - 1 гость, 2 комнаты - 1 или 2 гостя, 3 комнаты - 1, 2 или 3 гостя, 100 комнат - не для гостей';
 
 
 var titlesResidence = [
@@ -310,12 +311,14 @@ var capacity = document.querySelector('#capacity');
 
 var validationGuestsInRoom = function (evt) {
   // Сразу записываем сообщения об несоответствии комнат и гостей, в дальнейшем эти значения примут истинные значения
-  roomNumber.setCustomValidity('Количество гостей не соответствует количеству комнат: 1 комната - 1 гость, 2 комнаты - 1 или 2 гостя, 3 комнаты - 1, 2 или 3 гостя, 100 комнат - не для гостей');
-  capacity.setCustomValidity('Количество гостей не соответствует количеству комнат: 1 комната - 1 гость, 2 комнаты - 1 или 2 гостя, 3 комнаты - 1, 2 или 3 гостя, 100 комнат - не для гостей');
+  roomNumber.setCustomValidity(MESSAGE_ERROR_VALIDATION);
+  capacity.setCustomValidity(MESSAGE_ERROR_VALIDATION);
+  var expressionMaxRooms = (Number(roomNumber.options[roomNumber.selectedIndex].value) === MAX_ROOMS);
+  var expressionMagGuests = (Number(capacity.options[capacity.selectedIndex].value) === MAX_GUESTS);
   // Записываем значения условия в переменную (здесь условие, проверяющие, что нету не стандартных значений в комнатах и кол-ве гостей
-  var expressionWithoutMaxValue = ((Number(roomNumber.options[roomNumber.selectedIndex].value) !== MAX_ROOMS) && (Number(capacity.options[capacity.selectedIndex].value) !== MAX_GUESTS));
+  var expressionWithoutMaxValue = ((!expressionMaxRooms) && (!expressionMagGuests));
   // Здесь условие, что выбраны именно не стандартные значения комнат и гостей: 100 и 0;
-  var expressionWithMaxValue = ((Number(capacity.options[capacity.selectedIndex].value) === MAX_GUESTS) && (Number(roomNumber.options[roomNumber.selectedIndex].value) === MAX_ROOMS));
+  var expressionWithMaxValue = (expressionMagGuests && expressionMaxRooms);
   // Переменная, которая хранит условие проверки соответсвия гостей - комнатам, либо комнат - гостям.
   var currentExpressionCondition = (roomNumber.options[roomNumber.selectedIndex].value >= capacity.options[capacity.selectedIndex].value);
   if ((Boolean(evt)) && (evt.currentTarget.name === 'capacity')) {
