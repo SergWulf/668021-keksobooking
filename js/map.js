@@ -238,17 +238,64 @@ var buttonMouseUpHandlerCreatePins = function () {
     formAd.children[j].removeAttribute('disabled');
   }
   mapPin.removeEventListener('mouseup', buttonMouseUpHandlerCreatePins);
-  // Задание 2. Узнать координаты метки.
-  // Узнать координаты первой метки
-  // Вычислить координаты ее центра
-  var leftMapPin = mapPin.offsetLeft + HALF_WIDTH_MAIN_PIN;
-  var topMapPin = mapPin.offsetTop + HALF_HEIGHT_MAIN_PIN;
-  // Записать данные координат в форму объявления
-  formAd.querySelector('#address').setAttribute('value', leftMapPin + ', ' + topMapPin);
 };
 
-// Обработка события 'mouseup' на создание меток на карте и разблокировки полей формы
+// Обработка события 'mouseup' на главной метке: создание меток на карте и разблокировки полей формы
 mapPin.addEventListener('mouseup', buttonMouseUpHandlerCreatePins);
+
+//  Функция обработка события drag-and-drop
+var buttonMouseDownHandler = function (evt) {
+  evt.preventDefault();
+  // Начальные координаты во время нажатия на метку
+  var startCoords = {
+    x: evt.clientX,
+    y: evt.clientY
+  };
+  // Обработка события move
+  var buttonMouseMoveHandler = function (moveEvt) {
+    moveEvt.preventDefault();
+    // Сохраняем разницу координат между начальной и текущей позицией метки
+    var shift = {
+      x: startCoords.x - moveEvt.clientX,
+      y: startCoords.y - moveEvt.clientY
+    };
+    // Пересохраняем начальные координаты, на текущие
+    startCoords = {
+      x: moveEvt.clientX,
+      y: moveEvt.clientY
+    };
+    // Изменяем координаты метки
+    mapPin.style.top = (mapPin.offsetTop - shift.y) + 'px';
+    mapPin.style.left = (mapPin.offsetLeft - shift.x) + 'px';
+  };
+  // Обработка события mouseup
+  var buttonMouseUpHandler = function (upEvt) {
+    // ? Необходимо разделить координаты меток(если не было движения, то координаты центра)
+    // ? Если было движение, то коордианты указателя.
+    // ----------------------------------------------
+    // ? Также надо учесть выход за пределы карты метки.
+    // ----------------------------------------------
+    // ? Когда метка наезжает на действующую метку, то фокус передается в нее. Так и должно быть?
+    // ? Иногда метка начинает себя странно вести, улетает за пределы экрана(не совсем понял, как это можно отловить).
+    upEvt.preventDefault();
+    // Узнать координаты первой метки
+    // Вычислить координаты ее центра
+    var leftMapPin = mapPin.offsetLeft + HALF_WIDTH_MAIN_PIN;
+    var topMapPin = mapPin.offsetTop + HALF_HEIGHT_MAIN_PIN;
+    // Записать данные координат в форму объявления
+    formAd.querySelector('#address').setAttribute('value', leftMapPin + ', ' + topMapPin);
+    mapPin.removeEventListener('mousemove', buttonMouseMoveHandler);
+    mapPin.removeEventListener('mouseup', buttonMouseUpHandler);
+  };
+  // ? Вопросы: метка передвигается хорошо, если ее медленно передвигать
+  // ? Если резко дернуть мышь, то фокус уйдет, а метка остановится
+  // ? Но если вернутся на метку, то она опять начинает передвигаться
+  // ? Если резко уйти из фокуса и отпустить кнопку мыши, то при наведении на метку она опять к ней "приклеивается.
+  mapPin.addEventListener('mousemove', buttonMouseMoveHandler);
+  mapPin.addEventListener('mouseup', buttonMouseUpHandler);
+};
+
+mapPin.addEventListener('mousedown', buttonMouseDownHandler);
 
 // Обработка события 'click' на карте - если попали на метку, то отображем карточку метки(если уже есть карточка метки, то удаляем ее).
 mapAdverts.addEventListener('click', function (evt) {
