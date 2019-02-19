@@ -223,22 +223,21 @@ for (var i = 0; i < formAd.children.length; i++) {
 var mapAdverts = document.querySelector('.map');
 var mapPin = document.querySelector('.map__pin--main');
 
+// Создание объектов JS на основе созданных данных
+realEstates = createRealEstates(COUNT_REAL_ESATE);
+
 var buttonMouseUpHandlerCreatePins = function () {
-  // Создание объектов JS на основе созданных данных
-  realEstates = createRealEstates(COUNT_REAL_ESATE);
   // Находим блок, где будем отображать метки и отображаем их
   var blockPins = document.querySelector('.map__pins');
   blockPins.appendChild(renderPins(realEstates));
-  mapPin.removeEventListener('mouseup', buttonMouseUpHandlerCreatePins);
-};
-
-var buttonMouseUpHandler = function () {
+  // Удаляем блокировку полей формы
   mapAdverts.classList.remove('map--faded');
   formAd.classList.remove('ad-form--disabled');
   formFilters.classList.remove('ad-form--disabled');
   for (var j = 0; j < formAd.children.length; j++) {
     formAd.children[j].removeAttribute('disabled');
   }
+  mapPin.removeEventListener('mouseup', buttonMouseUpHandlerCreatePins);
   // Задание 2. Узнать координаты метки.
   // Узнать координаты первой метки
   // Вычислить координаты ее центра
@@ -248,9 +247,10 @@ var buttonMouseUpHandler = function () {
   formAd.querySelector('#address').setAttribute('value', leftMapPin + ', ' + topMapPin);
 };
 
+// Обработка события 'mouseup' на создание меток на карте и разблокировки полей формы
 mapPin.addEventListener('mouseup', buttonMouseUpHandlerCreatePins);
-mapPin.addEventListener('mouseup', buttonMouseUpHandler);
 
+// Обработка события 'click' на карте - если попали на метку, то отображем карточку метки(если уже есть карточка метки, то удаляем ее).
 mapAdverts.addEventListener('click', function (evt) {
   var target = evt.target;
   if (target.tagName === 'IMG') {
