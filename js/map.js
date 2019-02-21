@@ -7,8 +7,10 @@ var MIN_COUNT_ROOMS = 1;
 var MAX_COUNT_ROOMS = 5;
 var MIN_COUNT_GUESTS = 2;
 var MAX_COUNT_GUESTS = 11;
+// Координаты указателя метки
 var COORDINATE_PIN_X = 31;
 var COORDINATE_PIN_Y = 84;
+//
 var MIN_COORDINATE_Y = 130 + COORDINATE_PIN_Y;
 var MAX_COORDINATE_Y = 630 - COORDINATE_PIN_Y;
 var MIN_COORDINATE_X = 0 + COORDINATE_PIN_X;
@@ -226,8 +228,9 @@ var mapPin = document.querySelector('.map__pin--main');
 // Создание объектов JS на основе созданных данных
 realEstates = createRealEstates(COUNT_REAL_ESATE);
 
-var buttonMouseUpHandlerCreatePins = function () {
+var buttonMouseUpHandlerCreatePins = function (evt) {
   // Находим блок, где будем отображать метки и отображаем их
+  evt.preventDefault();
   var blockPins = document.querySelector('.map__pins');
   blockPins.appendChild(renderPins(realEstates));
   // Удаляем блокировку полей формы
@@ -274,9 +277,6 @@ var buttonMouseDownHandler = function (evt) {
     // ? Если было движение, то коордианты указателя.
     // ----------------------------------------------
     // ? Также надо учесть выход за пределы карты метки.
-    // ----------------------------------------------
-    // ? Когда метка наезжает на действующую метку, то фокус передается в нее. Так и должно быть?
-    // ? Иногда метка начинает себя странно вести, улетает за пределы экрана(не совсем понял, как это можно отловить).
     upEvt.preventDefault();
     // Узнать координаты первой метки
     // Вычислить координаты ее центра
@@ -284,15 +284,11 @@ var buttonMouseDownHandler = function (evt) {
     var topMapPin = mapPin.offsetTop + HALF_HEIGHT_MAIN_PIN;
     // Записать данные координат в форму объявления
     formAd.querySelector('#address').setAttribute('value', leftMapPin + ', ' + topMapPin);
-    mapPin.removeEventListener('mousemove', buttonMouseMoveHandler);
+    document.removeEventListener('mousemove', buttonMouseMoveHandler);
     mapPin.removeEventListener('mouseup', buttonMouseUpHandler);
   };
-  // ? Вопросы: метка передвигается хорошо, если ее медленно передвигать
-  // ? Если резко дернуть мышь, то фокус уйдет, а метка остановится
-  // ? Но если вернутся на метку, то она опять начинает передвигаться
-  // ? Если резко уйти из фокуса и отпустить кнопку мыши, то при наведении на метку она опять к ней "приклеивается.
-  mapPin.addEventListener('mousemove', buttonMouseMoveHandler);
-  mapPin.addEventListener('mouseup', buttonMouseUpHandler);
+  document.addEventListener('mousemove', buttonMouseMoveHandler);
+  document.addEventListener('mouseup', buttonMouseUpHandler);
 };
 
 mapPin.addEventListener('mousedown', buttonMouseDownHandler);
