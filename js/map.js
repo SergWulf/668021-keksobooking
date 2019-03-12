@@ -7,14 +7,16 @@ var MIN_COUNT_ROOMS = 1;
 var MAX_COUNT_ROOMS = 5;
 var MIN_COUNT_GUESTS = 2;
 var MAX_COUNT_GUESTS = 11;
-// Координаты указателя метки мелких иконок
+// Координаты указателя метки мелких меток
 var COORDINATE_PIN_X = 25;
 var COORDINATE_PIN_Y = 70;
-// Координаты указателя метки главной иконки
 var COORDINATE_HALF_PIN_MAIN_X_Y = 31;
-var COORDINATE_PIN_MAIN_Y = 82;
-var MIN_COORDINATE_Y = 130 + COORDINATE_PIN_Y;
-var MAX_COORDINATE_Y = 630 - COORDINATE_PIN_Y;
+var HEIGHT_PIN_MAIN = 82;
+var WIDTH_PIN_MAIN = 62;
+var MIN_MAP_Y = 130;
+var MAX_MAP_Y = 630;
+var MIN_COORDINATE_Y = MIN_MAP_Y + COORDINATE_PIN_Y;
+var MAX_COORDINATE_Y = MAX_MAP_Y - COORDINATE_PIN_Y;
 var MIN_COORDINATE_X = 0 + COORDINATE_PIN_X;
 var MAX_COORDINATE_X = document.querySelector('.map').clientWidth - COORDINATE_PIN_X;
 var realEstates = [];
@@ -270,8 +272,22 @@ var buttonMouseDownHandler = function (evt) {
       y: moveEvt.clientY
     };
     // Изменяем координаты метки
-    mapPin.style.top = (mapPin.offsetTop - shift.y) + 'px';
-    mapPin.style.left = (mapPin.offsetLeft - shift.x) + 'px';
+    // Если по горизонтали влево значение координаты Х равно или меньше нуля, то перестаем изменять координату X
+    // Если по горизонтали вправо значение координаты Х равно или больше размера блока карты с учётом вычета ширины метки, то перестаем изменять координату X
+    // Если по вертикали сверху значение координаты Y равно или меньше 130, то перестаем изменять координату Y
+    // Если по вертикали снизу значение коорданаты Y больше 630 (с учетом вычета высоты метки), то перестаем изменять координату Y.
+    var newOffsetLeft = Number(mapPin.offsetLeft - shift.x);
+    var newOffsetTop = Number(mapPin.offsetTop - shift.y);
+    var minCoordinateX = 0;
+    var maxCoordinateX = document.querySelector('.map').clientWidth - WIDTH_PIN_MAIN;
+    var minCoordinateY = MIN_MAP_Y - HEIGHT_PIN_MAIN;
+    var maxCoordinateY = MAX_MAP_Y - HEIGHT_PIN_MAIN;
+    if ((newOffsetLeft >= minCoordinateX) && (newOffsetLeft <= maxCoordinateX)) {
+      mapPin.style.left = (mapPin.offsetLeft - shift.x) + 'px';
+    }
+    if (((newOffsetTop >= minCoordinateY)) && (newOffsetTop <= maxCoordinateY)) {
+      mapPin.style.top = (mapPin.offsetTop - shift.y) + 'px';
+    }
   };
   // Обработка события mouseup
   var buttonMouseUpHandler = function (upEvt) {
@@ -281,10 +297,8 @@ var buttonMouseDownHandler = function (evt) {
     var leftMapPin = mapPin.offsetLeft + COORDINATE_HALF_PIN_MAIN_X_Y;
     var topMapPin = mapPin.offsetTop + COORDINATE_HALF_PIN_MAIN_X_Y;
     if (dragged) {
-      topMapPin = mapPin.offsetTop + COORDINATE_PIN_MAIN_Y;
+      topMapPin = mapPin.offsetTop + HEIGHT_PIN_MAIN;
     }
-    // ----------------------------------------------
-    // ? Также надо учесть выход за пределы карты метки.
 
     // Записать данные координат в форму объявления
     formAd.querySelector('#address').setAttribute('value', leftMapPin + ', ' + topMapPin);
