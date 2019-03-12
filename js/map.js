@@ -7,16 +7,16 @@ var MIN_COUNT_ROOMS = 1;
 var MAX_COUNT_ROOMS = 5;
 var MIN_COUNT_GUESTS = 2;
 var MAX_COUNT_GUESTS = 11;
-// Координаты указателя метки
-var COORDINATE_PIN_X = 31;
-var COORDINATE_PIN_Y = 84;
-//
+// Координаты указателя метки мелких иконок
+var COORDINATE_PIN_X = 25;
+var COORDINATE_PIN_Y = 70;
+// Координаты указателя метки главной иконки
+var COORDINATE_HALF_PIN_MAIN_X_Y = 31;
+var COORDINATE_PIN_MAIN_Y = 82;
 var MIN_COORDINATE_Y = 130 + COORDINATE_PIN_Y;
 var MAX_COORDINATE_Y = 630 - COORDINATE_PIN_Y;
 var MIN_COORDINATE_X = 0 + COORDINATE_PIN_X;
 var MAX_COORDINATE_X = document.querySelector('.map').clientWidth - COORDINATE_PIN_X;
-var HALF_WIDTH_MAIN_PIN = 31;
-var HALF_HEIGHT_MAIN_PIN = 31;
 var realEstates = [];
 var MAX_ROOMS = 100;
 var MAX_GUESTS = 0;
@@ -254,8 +254,10 @@ var buttonMouseDownHandler = function (evt) {
     x: evt.clientX,
     y: evt.clientY
   };
+  var dragged = false;
   // Обработка события move
   var buttonMouseMoveHandler = function (moveEvt) {
+    dragged = true;
     moveEvt.preventDefault();
     // Сохраняем разницу координат между начальной и текущей позицией метки
     var shift = {
@@ -273,15 +275,17 @@ var buttonMouseDownHandler = function (evt) {
   };
   // Обработка события mouseup
   var buttonMouseUpHandler = function (upEvt) {
-    // ? Необходимо разделить координаты меток(если не было движения, то координаты центра)
-    // ? Если было движение, то коордианты указателя.
+    upEvt.preventDefault();
+    //  Определяем координаты главной метки, если не было движения, то координаты центра
+    //  Если было движение, то коордианты конца указателя.
+    var leftMapPin = mapPin.offsetLeft + COORDINATE_HALF_PIN_MAIN_X_Y;
+    var topMapPin = mapPin.offsetTop + COORDINATE_HALF_PIN_MAIN_X_Y;
+    if (dragged) {
+      topMapPin = mapPin.offsetTop + COORDINATE_PIN_MAIN_Y;
+    }
     // ----------------------------------------------
     // ? Также надо учесть выход за пределы карты метки.
-    upEvt.preventDefault();
-    // Узнать координаты первой метки
-    // Вычислить координаты ее центра
-    var leftMapPin = mapPin.offsetLeft + HALF_WIDTH_MAIN_PIN;
-    var topMapPin = mapPin.offsetTop + HALF_HEIGHT_MAIN_PIN;
+
     // Записать данные координат в форму объявления
     formAd.querySelector('#address').setAttribute('value', leftMapPin + ', ' + topMapPin);
     document.removeEventListener('mousemove', buttonMouseMoveHandler);
