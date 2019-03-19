@@ -244,23 +244,28 @@ formAd.querySelector('#address').setAttribute('value', showCoordinatesMapPin(map
 // Создание объектов JS на основе созданных данных
 realEstates = createRealEstates(COUNT_REAL_ESATE);
 
-var buttonMouseUpHandlerCreatePins = function (evt) {
-  // Находим блок, где будем отображать метки и отображаем их
-  evt.preventDefault();
-  var blockPins = document.querySelector('.map__pins');
-  blockPins.appendChild(renderPins(realEstates));
-  // Удаляем блокировку полей формы
-  mapAdverts.classList.remove('map--faded');
-  formAd.classList.remove('ad-form--disabled');
-  formFilters.classList.remove('ad-form--disabled');
-  for (var j = 0; j < formAd.children.length; j++) {
-    formAd.children[j].removeAttribute('disabled');
-  }
-  mapPin.removeEventListener('mouseup', buttonMouseUpHandlerCreatePins);
+var buttonMouseDownHandlerCreatePins = function (evtDoc) {
+  evtDoc.preventDefault();
+  var buttonMouseUpHandlerCreatePins = function (evt) {
+    // Находим блок, где будем отображать метки и отображаем их
+    evt.preventDefault();
+    var blockPins = document.querySelector('.map__pins');
+    blockPins.appendChild(renderPins(realEstates));
+    // Удаляем блокировку полей формы
+    mapAdverts.classList.remove('map--faded');
+    formAd.classList.remove('ad-form--disabled');
+    formFilters.classList.remove('ad-form--disabled');
+    for (var j = 0; j < formAd.children.length; j++) {
+      formAd.children[j].removeAttribute('disabled');
+    }
+    document.removeEventListener('mouseup', buttonMouseUpHandlerCreatePins);
+  };
+  document.addEventListener('mouseup', buttonMouseUpHandlerCreatePins);
+  mapPin.removeEventListener('mousedown', buttonMouseDownHandlerCreatePins);
 };
 
-// Обработка события 'mouseup' на главной метке: создание меток на карте и разблокировки полей формы
-mapPin.addEventListener('mouseup', buttonMouseUpHandlerCreatePins);
+// Обработка события 'mouseup' через 'mousedown' на главной метке: создание меток на карте и разблокировки полей формы
+mapPin.addEventListener('mousedown', buttonMouseDownHandlerCreatePins);
 
 //  Функция обработка события drag-and-drop
 var buttonMouseDownHandler = function (evt) {
