@@ -267,6 +267,15 @@ var buttonMouseDownHandlerCreatePins = function (evtDoc) {
 // Обработка события 'mouseup' через 'mousedown' на главной метке: создание меток на карте и разблокировки полей формы
 mapPin.addEventListener('mousedown', buttonMouseDownHandlerCreatePins);
 
+// Дополнительная очистка поля с данными координат метки
+var buttonFormReset = document.querySelector('.ad-form__reset');
+var buttonResetClickHandler = function () {
+  formAd.querySelector('#address').setAttribute('value', '');
+};
+
+buttonFormReset.addEventListener('click', buttonResetClickHandler);
+
+
 //  Функция обработка события drag-and-drop
 var buttonMouseDownHandler = function (evt) {
   evt.preventDefault();
