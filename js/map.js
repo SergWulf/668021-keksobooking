@@ -227,6 +227,20 @@ for (var i = 0; i < formAd.children.length; i++) {
 var mapAdverts = document.querySelector('.map');
 var mapPin = document.querySelector('.map__pin--main');
 
+// Функция отображения координат метки
+var showCoordinatesMapPin = function (pin, drag) {
+  var leftMapPin = pin.offsetLeft + COORDINATE_HALF_PIN_MAIN_X_Y;
+  var topMapPin = pin.offsetTop + COORDINATE_HALF_PIN_MAIN_X_Y;
+  if (drag) {
+    topMapPin = mapPin.offsetTop + HEIGHT_PIN_MAIN;
+  }
+  // Записать данные координат в форму объявления
+  return String(leftMapPin + ', ' + topMapPin);
+};
+
+// Изначальные координаты метки
+formAd.querySelector('#address').setAttribute('value', showCoordinatesMapPin(mapPin, false));
+
 // Создание объектов JS на основе созданных данных
 realEstates = createRealEstates(COUNT_REAL_ESATE);
 
@@ -288,20 +302,15 @@ var buttonMouseDownHandler = function (evt) {
     if (((newOffsetTop >= minCoordinateY)) && (newOffsetTop <= maxCoordinateY)) {
       mapPin.style.top = (mapPin.offsetTop - shift.y) + 'px';
     }
+    // Запись координат в форму объявления
+    formAd.querySelector('#address').setAttribute('value', showCoordinatesMapPin(mapPin, dragged));
   };
   // Обработка события mouseup
   var buttonMouseUpHandler = function (upEvt) {
     upEvt.preventDefault();
-    //  Определяем координаты главной метки, если не было движения, то координаты центра
-    //  Если было движение, то коордианты конца указателя.
-    var leftMapPin = mapPin.offsetLeft + COORDINATE_HALF_PIN_MAIN_X_Y;
-    var topMapPin = mapPin.offsetTop + COORDINATE_HALF_PIN_MAIN_X_Y;
-    if (dragged) {
-      topMapPin = mapPin.offsetTop + HEIGHT_PIN_MAIN;
-    }
 
-    // Записать данные координат в форму объявления
-    formAd.querySelector('#address').setAttribute('value', leftMapPin + ', ' + topMapPin);
+    // Запись координат в форму объявления
+    formAd.querySelector('#address').setAttribute('value', showCoordinatesMapPin(mapPin, dragged));
     document.removeEventListener('mousemove', buttonMouseMoveHandler);
     mapPin.removeEventListener('mouseup', buttonMouseUpHandler);
   };
