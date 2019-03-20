@@ -7,6 +7,9 @@ var MIN_COUNT_ROOMS = 1;
 var MAX_COUNT_ROOMS = 5;
 var MIN_COUNT_GUESTS = 2;
 var MAX_COUNT_GUESTS = 11;
+// Начальные координаты главной метки
+var BEGIN_PIN_MAIN_COORIDNATE_X = 570;
+var BEGIN_PIN_MAIN_COORDINATE_Y = 370;
 // Координаты указателя метки мелких меток
 var COORDINATE_PIN_X = 25;
 var COORDINATE_PIN_Y = 70;
@@ -232,7 +235,7 @@ var showCoordinatesMapPin = function (pin, drag) {
   var leftMapPin = pin.offsetLeft + COORDINATE_HALF_PIN_MAIN_X_Y;
   var topMapPin = pin.offsetTop + COORDINATE_HALF_PIN_MAIN_X_Y;
   if (drag) {
-    topMapPin = mapPin.offsetTop + HEIGHT_PIN_MAIN;
+    topMapPin = pin.offsetTop + HEIGHT_PIN_MAIN;
   }
   // Записать данные координат в форму объявления
   return String(leftMapPin + ', ' + topMapPin);
@@ -246,13 +249,14 @@ realEstates = createRealEstates(COUNT_REAL_ESATE);
 
 var buttonMouseDownHandlerCreatePins = function (evtDoc) {
   evtDoc.preventDefault();
+  // Изменяем первоначальный вид главной метки: добавляем указатель и убираем анимацию
+  mapAdverts.classList.remove('map--faded');
   var buttonMouseUpHandlerCreatePins = function (evt) {
     // Находим блок, где будем отображать метки и отображаем их
     evt.preventDefault();
     var blockPins = document.querySelector('.map__pins');
     blockPins.appendChild(renderPins(realEstates));
     // Удаляем блокировку полей формы
-    mapAdverts.classList.remove('map--faded');
     formAd.classList.remove('ad-form--disabled');
     formFilters.classList.remove('ad-form--disabled');
     for (var j = 0; j < formAd.children.length; j++) {
@@ -270,7 +274,22 @@ mapPin.addEventListener('mousedown', buttonMouseDownHandlerCreatePins);
 // Дополнительная очистка поля с данными координат метки
 var buttonFormReset = document.querySelector('.ad-form__reset');
 var buttonResetClickHandler = function () {
-  formAd.querySelector('#address').setAttribute('value', '');
+  mapAdverts.classList.add('map--faded');
+  var blockPins = document.querySelector('.map__pins');
+  for (var j = 0; j < realEstates.length; j++) {
+    blockPins.removeChild(blockPins.lastChild);
+  }
+  mapPin.style.left = String(BEGIN_PIN_MAIN_COORIDNATE_X + 'px');
+  mapPin.style.top = String(BEGIN_PIN_MAIN_COORDINATE_Y + 'px');
+  // Изначальные координаты метки
+  formAd.querySelector('#address').setAttribute('value', showCoordinatesMapPin(mapPin, false));
+  formAd.classList.add('ad-form--disabled');
+  formFilters.classList.add('ad-form--disabled');
+  for (var j = 0; j < formAd.children.length; j++) {
+    formAd.children[j].setAttribute('disabled', 'disabled');
+  }
+  // Обработка события 'mouseup' через 'mousedown' на главной метке: создание меток на карте и разблокировки полей формы
+  mapPin.addEventListener('mousedown', buttonMouseDownHandlerCreatePins);
 };
 
 buttonFormReset.addEventListener('click', buttonResetClickHandler);
