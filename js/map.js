@@ -247,21 +247,35 @@ formAd.querySelector('#address').setAttribute('value', showCoordinatesMapPin(map
 // Создание объектов JS на основе созданных данных
 realEstates = createRealEstates(COUNT_REAL_ESATE);
 
+// Функция блокировки/разблокировки полей формы
+var blockingFormFields = function (block) {
+  if (!block) {
+    // Удаляем блокировку полей формы
+    formAd.classList.remove('ad-form--disabled');
+    for (var j = 0; j < formAd.children.length; j++) {
+      formAd.children[j].removeAttribute('disabled');
+    }
+  } else {
+    // Добавляем блокировку полей формы
+    formAd.classList.add('ad-form--disabled');
+    for (var j = 0; j < formAd.children.length; j++) {
+      formAd.children[j].setAttribute('disabled', 'disabled');
+    }
+  }
+};
+
 var buttonMouseDownHandlerCreatePins = function (evtDoc) {
   evtDoc.preventDefault();
   // Изменяем первоначальный вид главной метки: добавляем указатель и убираем анимацию
   mapAdverts.classList.remove('map--faded');
+  formFilters.classList.remove('ad-form--disabled');
   var buttonMouseUpHandlerCreatePins = function (evt) {
     // Находим блок, где будем отображать метки и отображаем их
     evt.preventDefault();
     var blockPins = document.querySelector('.map__pins');
     blockPins.appendChild(renderPins(realEstates));
     // Удаляем блокировку полей формы
-    formAd.classList.remove('ad-form--disabled');
-    formFilters.classList.remove('ad-form--disabled');
-    for (var j = 0; j < formAd.children.length; j++) {
-      formAd.children[j].removeAttribute('disabled');
-    }
+    blockingFormFields(false);
     document.removeEventListener('mouseup', buttonMouseUpHandlerCreatePins);
   };
   document.addEventListener('mouseup', buttonMouseUpHandlerCreatePins);
@@ -273,8 +287,11 @@ mapPin.addEventListener('mousedown', buttonMouseDownHandlerCreatePins);
 
 // Дополнительная очистка поля с данными координат метки
 var buttonFormReset = document.querySelector('.ad-form__reset');
-var buttonResetClickHandler = function () {
+var buttonResetClickHandler = function (evtReset) {
+  evtReset.preventDefault();
+  formAd.reset();
   mapAdverts.classList.add('map--faded');
+  formFilters.classList.add('ad-form--disabled');
   var blockPins = document.querySelector('.map__pins');
   for (var j = 0; j < realEstates.length; j++) {
     blockPins.removeChild(blockPins.lastChild);
@@ -283,11 +300,7 @@ var buttonResetClickHandler = function () {
   mapPin.style.top = String(BEGIN_PIN_MAIN_COORDINATE_Y + 'px');
   // Изначальные координаты метки
   formAd.querySelector('#address').setAttribute('value', showCoordinatesMapPin(mapPin, false));
-  formAd.classList.add('ad-form--disabled');
-  formFilters.classList.add('ad-form--disabled');
-  for (var j = 0; j < formAd.children.length; j++) {
-    formAd.children[j].setAttribute('disabled', 'disabled');
-  }
+  blockingFormFields(true);
   // Обработка события 'mouseup' через 'mousedown' на главной метке: создание меток на карте и разблокировки полей формы
   mapPin.addEventListener('mousedown', buttonMouseDownHandlerCreatePins);
 };
@@ -345,7 +358,7 @@ var buttonMouseDownHandler = function (evt) {
     // Запись координат в форму объявления
     formAd.querySelector('#address').setAttribute('value', showCoordinatesMapPin(mapPin, dragged));
     document.removeEventListener('mousemove', buttonMouseMoveHandler);
-    mapPin.removeEventListener('mouseup', buttonMouseUpHandler);
+    document.removeEventListener('mouseup', buttonMouseUpHandler);
   };
   document.addEventListener('mousemove', buttonMouseMoveHandler);
   document.addEventListener('mouseup', buttonMouseUpHandler);
