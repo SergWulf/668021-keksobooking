@@ -249,15 +249,13 @@ realEstates = createRealEstates(COUNT_REAL_ESATE);
 
 // Функция блокировки/разблокировки полей формы
 var blockingFormFields = function (block) {
-  var disabledForm = function (disable) {
-    return (disable) ? formAd.classList.remove('ad-form--disabled') : formAd.classList.add('ad-form--disabled');
-  };
-  var disabledFields = function (disable, count) {
-    return (disable) ? formAd.children[j].removeAttribute('disabled') : formAd.children[j].setAttribute('disabled', 'disabled');
-  }
-  disabledForm(!block);
+  formAd.classList.toggle('ad-form--disabled');
   for (var j = 0; j < formAd.children.length; j++) {
-    disabledFields(!block, j);
+    if (!block) {
+      formAd.children[j].removeAttribute('disabled');
+    } else {
+      formAd.children[j].setAttribute('disabled', 'disabled');
+    }
   }
 };
 
