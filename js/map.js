@@ -7,14 +7,21 @@ var MIN_COUNT_ROOMS = 1;
 var MAX_COUNT_ROOMS = 5;
 var MIN_COUNT_GUESTS = 2;
 var MAX_COUNT_GUESTS = 11;
-var COORDINATE_PIN_X = 31;
-var COORDINATE_PIN_Y = 84;
-var MIN_COORDINATE_Y = 130 + COORDINATE_PIN_Y;
-var MAX_COORDINATE_Y = 630 - COORDINATE_PIN_Y;
+// Начальные координаты главной метки
+var BEGIN_PIN_MAIN_COORIDNATE_X = 570;
+var BEGIN_PIN_MAIN_COORDINATE_Y = 370;
+// Координаты указателя метки мелких меток
+var COORDINATE_PIN_X = 25;
+var COORDINATE_PIN_Y = 70;
+var COORDINATE_HALF_PIN_MAIN_X_Y = 31;
+var HEIGHT_PIN_MAIN = 82;
+var WIDTH_PIN_MAIN = 62;
+var MIN_MAP_Y = 130;
+var MAX_MAP_Y = 630;
+var MIN_COORDINATE_Y = MIN_MAP_Y + COORDINATE_PIN_Y;
+var MAX_COORDINATE_Y = MAX_MAP_Y - COORDINATE_PIN_Y;
 var MIN_COORDINATE_X = 0 + COORDINATE_PIN_X;
 var MAX_COORDINATE_X = document.querySelector('.map').clientWidth - COORDINATE_PIN_X;
-var HALF_WIDTH_MAIN_PIN = 31;
-var HALF_HEIGHT_MAIN_PIN = 31;
 var realEstates = [];
 var MAX_ROOMS = 100;
 var MAX_GUESTS = 0;
@@ -223,34 +230,138 @@ for (var i = 0; i < formAd.children.length; i++) {
 var mapAdverts = document.querySelector('.map');
 var mapPin = document.querySelector('.map__pin--main');
 
-var buttonMouseUpHandlerCreatePins = function () {
-  // Создание объектов JS на основе созданных данных
-  realEstates = createRealEstates(COUNT_REAL_ESATE);
-  // Находим блок, где будем отображать метки и отображаем их
-  var blockPins = document.querySelector('.map__pins');
-  blockPins.appendChild(renderPins(realEstates));
-  mapPin.removeEventListener('mouseup', buttonMouseUpHandlerCreatePins);
-};
-
-var buttonMouseUpHandler = function () {
-  mapAdverts.classList.remove('map--faded');
-  formAd.classList.remove('ad-form--disabled');
-  formFilters.classList.remove('ad-form--disabled');
-  for (var j = 0; j < formAd.children.length; j++) {
-    formAd.children[j].removeAttribute('disabled');
+// Функция отображения координат метки
+var showCoordinatesMapPin = function (pin, drag) {
+  var leftMapPin = pin.offsetLeft + COORDINATE_HALF_PIN_MAIN_X_Y;
+  var topMapPin = pin.offsetTop + COORDINATE_HALF_PIN_MAIN_X_Y;
+  if (drag) {
+    topMapPin = pin.offsetTop + HEIGHT_PIN_MAIN;
   }
-  // Задание 2. Узнать координаты метки.
-  // Узнать координаты первой метки
-  // Вычислить координаты ее центра
-  var leftMapPin = mapPin.offsetLeft + HALF_WIDTH_MAIN_PIN;
-  var topMapPin = mapPin.offsetTop + HALF_HEIGHT_MAIN_PIN;
   // Записать данные координат в форму объявления
-  formAd.querySelector('#address').setAttribute('value', leftMapPin + ', ' + topMapPin);
+  return String(leftMapPin + ', ' + topMapPin);
 };
 
-mapPin.addEventListener('mouseup', buttonMouseUpHandlerCreatePins);
-mapPin.addEventListener('mouseup', buttonMouseUpHandler);
+// Изначальные координаты метки
+formAd.querySelector('#address').setAttribute('value', showCoordinatesMapPin(mapPin, false));
 
+// Создание объектов JS на основе созданных данных
+realEstates = createRealEstates(COUNT_REAL_ESATE);
+
+// Функция блокировки/разблокировки полей формы
+var blockingFormFields = function (block) {
+  formAd.classList.toggle('ad-form--disabled');
+  for (var j = 0; j < formAd.children.length; j++) {
+    if (!block) {
+      formAd.children[j].removeAttribute('disabled');
+    } else {
+      formAd.children[j].setAttribute('disabled', 'disabled');
+    }
+  }
+};
+
+var buttonMouseDownHandlerCreatePins = function (evtDoc) {
+  evtDoc.preventDefault();
+  // Изменяем первоначальный вид главной метки: добавляем указатель и убираем анимацию
+  mapAdverts.classList.remove('map--faded');
+  formFilters.classList.remove('ad-form--disabled');
+  var buttonMouseUpHandlerCreatePins = function (evt) {
+    // Находим блок, где будем отображать метки и отображаем их
+    evt.preventDefault();
+    var blockPins = document.querySelector('.map__pins');
+    blockPins.appendChild(renderPins(realEstates));
+    // Удаляем блокировку полей формы
+    blockingFormFields(false);
+    document.removeEventListener('mouseup', buttonMouseUpHandlerCreatePins);
+  };
+  document.addEventListener('mouseup', buttonMouseUpHandlerCreatePins);
+  mapPin.removeEventListener('mousedown', buttonMouseDownHandlerCreatePins);
+};
+
+// Обработка события 'mouseup' через 'mousedown' на главной метке: создание меток на карте и разблокировки полей формы
+mapPin.addEventListener('mousedown', buttonMouseDownHandlerCreatePins);
+
+// Дополнительная очистка поля с данными координат метки
+var buttonFormReset = document.querySelector('.ad-form__reset');
+var buttonResetClickHandler = function (evtReset) {
+  evtReset.preventDefault();
+  formAd.reset();
+  mapAdverts.classList.add('map--faded');
+  formFilters.classList.add('ad-form--disabled');
+  var blockPins = document.querySelector('.map__pins');
+  for (var j = 0; j < realEstates.length; j++) {
+    blockPins.removeChild(blockPins.lastChild);
+  }
+  mapPin.style.left = String(BEGIN_PIN_MAIN_COORIDNATE_X + 'px');
+  mapPin.style.top = String(BEGIN_PIN_MAIN_COORDINATE_Y + 'px');
+  // Изначальные координаты метки
+  formAd.querySelector('#address').setAttribute('value', showCoordinatesMapPin(mapPin, false));
+  blockingFormFields(true);
+  // Обработка события 'mouseup' через 'mousedown' на главной метке: создание меток на карте и разблокировки полей формы
+  mapPin.addEventListener('mousedown', buttonMouseDownHandlerCreatePins);
+};
+
+buttonFormReset.addEventListener('click', buttonResetClickHandler);
+
+
+//  Функция обработка события drag-and-drop
+var buttonMouseDownHandler = function (evt) {
+  evt.preventDefault();
+  // Начальные координаты во время нажатия на метку
+  var startCoords = {
+    x: evt.clientX,
+    y: evt.clientY
+  };
+  var dragged = false;
+  // Обработка события move
+  var buttonMouseMoveHandler = function (moveEvt) {
+    dragged = true;
+    moveEvt.preventDefault();
+    // Сохраняем разницу координат между начальной и текущей позицией метки
+    var shift = {
+      x: startCoords.x - moveEvt.clientX,
+      y: startCoords.y - moveEvt.clientY
+    };
+    // Пересохраняем начальные координаты, на текущие
+    startCoords = {
+      x: moveEvt.clientX,
+      y: moveEvt.clientY
+    };
+    // Изменяем координаты метки
+    // Если по горизонтали влево значение координаты Х равно или меньше нуля, то перестаем изменять координату X
+    // Если по горизонтали вправо значение координаты Х равно или больше размера блока карты с учётом вычета ширины метки, то перестаем изменять координату X
+    // Если по вертикали сверху значение координаты Y равно или меньше 130, то перестаем изменять координату Y
+    // Если по вертикали снизу значение коорданаты Y больше 630 (с учетом вычета высоты метки), то перестаем изменять координату Y.
+    var newOffsetLeft = Number(mapPin.offsetLeft - shift.x);
+    var newOffsetTop = Number(mapPin.offsetTop - shift.y);
+    var minCoordinateX = 0;
+    var maxCoordinateX = document.querySelector('.map').clientWidth - WIDTH_PIN_MAIN;
+    var minCoordinateY = MIN_MAP_Y - HEIGHT_PIN_MAIN;
+    var maxCoordinateY = MAX_MAP_Y - HEIGHT_PIN_MAIN;
+    if ((newOffsetLeft >= minCoordinateX) && (newOffsetLeft <= maxCoordinateX)) {
+      mapPin.style.left = (mapPin.offsetLeft - shift.x) + 'px';
+    }
+    if (((newOffsetTop >= minCoordinateY)) && (newOffsetTop <= maxCoordinateY)) {
+      mapPin.style.top = (mapPin.offsetTop - shift.y) + 'px';
+    }
+    // Запись координат в форму объявления
+    formAd.querySelector('#address').setAttribute('value', showCoordinatesMapPin(mapPin, dragged));
+  };
+  // Обработка события mouseup
+  var buttonMouseUpHandler = function (upEvt) {
+    upEvt.preventDefault();
+
+    // Запись координат в форму объявления
+    formAd.querySelector('#address').setAttribute('value', showCoordinatesMapPin(mapPin, dragged));
+    document.removeEventListener('mousemove', buttonMouseMoveHandler);
+    document.removeEventListener('mouseup', buttonMouseUpHandler);
+  };
+  document.addEventListener('mousemove', buttonMouseMoveHandler);
+  document.addEventListener('mouseup', buttonMouseUpHandler);
+};
+
+mapPin.addEventListener('mousedown', buttonMouseDownHandler);
+
+// Обработка события 'click' на карте - если попали на метку, то отображем карточку метки(если уже есть карточка метки, то удаляем ее).
 mapAdverts.addEventListener('click', function (evt) {
   var target = evt.target;
   if (target.tagName === 'IMG') {
