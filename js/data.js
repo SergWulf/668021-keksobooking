@@ -20,6 +20,8 @@
   var MIN_COORDINATE_X = 0 + COORDINATE_PIN_X;
   var MAX_COORDINATE_X = document.querySelector('.map').clientWidth - COORDINATE_PIN_X;
 
+  var mapAdverts = document.querySelector('.map');
+  var mapPin = document.querySelector('.map__pin--main');
   var realEstates = [];
 
   var titlesResidence = [
@@ -138,6 +140,6 @@
     realEstates: realEstates,
     COORDINATE_PIN_X: COORDINATE_PIN_X,
     COORDINATE_PIN_Y: COORDINATE_PIN_Y,
-    titlesResidence: titlesResidence
+    typeResidence: typeResidence
   };
 })();

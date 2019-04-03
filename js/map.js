@@ -7,15 +7,6 @@ var COORDINATE_HALF_PIN_MAIN_X_Y = 31;
 var HEIGHT_PIN_MAIN = 82;
 var WIDTH_PIN_MAIN = 62;
 
-var formAd = document.querySelector('.ad-form');
-var formFilters = document.querySelector('.map__filters');
-
-for (var i = 0; i < formAd.children.length; i++) {
-  formAd.children[i].setAttribute('disabled', 'disabled');
-}
-
-var mapAdverts = document.querySelector('.map');
-var mapPin = document.querySelector('.map__pin--main');
 
 // Функция отображения координат метки
 var showCoordinatesMapPin = function (pin, drag) {
@@ -52,29 +43,6 @@ var buttonMouseDownHandlerCreatePins = function (evtDoc) {
 
 // Обработка события 'mouseup' через 'mousedown' на главной метке: создание меток на карте и разблокировки полей формы
 mapPin.addEventListener('mousedown', buttonMouseDownHandlerCreatePins);
-
-// Дополнительная очистка поля с данными координат метки
-var buttonFormReset = document.querySelector('.ad-form__reset');
-var buttonResetClickHandler = function (evtReset) {
-  evtReset.preventDefault();
-  formAd.reset();
-  mapAdverts.classList.add('map--faded');
-  formFilters.classList.add('ad-form--disabled');
-  var blockPins = document.querySelector('.map__pins');
-  for (var j = 0; j < realEstates.length; j++) {
-    blockPins.removeChild(blockPins.lastChild);
-  }
-  mapPin.style.left = String(BEGIN_PIN_MAIN_COORDINATE_X + 'px');
-  mapPin.style.top = String(BEGIN_PIN_MAIN_COORDINATE_Y + 'px');
-  // Изначальные координаты метки
-  formAd.querySelector('#address').setAttribute('value', showCoordinatesMapPin(mapPin, false));
-  blockingFormFields(true);
-  // Обработка события 'mouseup' через 'mousedown' на главной метке: создание меток на карте и разблокировки полей формы
-  mapPin.addEventListener('mousedown', buttonMouseDownHandlerCreatePins);
-};
-
-buttonFormReset.addEventListener('click', buttonResetClickHandler);
-
 
 //  Функция обработка события drag-and-drop
 var buttonMouseDownHandler = function (evt) {
