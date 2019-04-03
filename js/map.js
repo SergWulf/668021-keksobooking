@@ -1,91 +1,11 @@
 'use strict';
 
-// Данные для создание и отображения меток
-
 // Начальные координаты главной метки
-var BEGIN_PIN_MAIN_COORIDNATE_X = 570;
+var BEGIN_PIN_MAIN_COORDINATE_X = 570;
 var BEGIN_PIN_MAIN_COORDINATE_Y = 370;
-// Координаты указателя метки мелких меток
-var COORDINATE_PIN_X = 25;
-var COORDINATE_PIN_Y = 70;
 var COORDINATE_HALF_PIN_MAIN_X_Y = 31;
 var HEIGHT_PIN_MAIN = 82;
 var WIDTH_PIN_MAIN = 62;
-var MIN_MAP_Y = 130;
-var MAX_MAP_Y = 630;
-var MIN_COORDINATE_Y = MIN_MAP_Y + COORDINATE_PIN_Y;
-var MAX_COORDINATE_Y = MAX_MAP_Y - COORDINATE_PIN_Y;
-var MIN_COORDINATE_X = 0 + COORDINATE_PIN_X;
-var MAX_COORDINATE_X = document.querySelector('.map').clientWidth - COORDINATE_PIN_X;
-
-
-// Отображение меток на карте
-
-// Создаем шаблон для отображения метки на карте
-var pinTemplate = document.querySelector('#pin').content.querySelector('.map__pin');
-
-// Функция создание и добавления метки в pinElement
-var renderPin = function (realEstatePin) {
-  var pinElement = pinTemplate.cloneNode(true);
-  var pinPointerCoordinateX = Number(realEstatePin['location']['x']) - COORDINATE_PIN_X;
-  var pinPointerCoordianteY = Number(realEstatePin['location']['y']) - COORDINATE_PIN_Y;
-  pinElement.style = 'left: ' + pinPointerCoordinateX + 'px; top: ' + pinPointerCoordianteY + 'px;';
-  pinElement.querySelector('img').src = realEstatePin['author']['avatar'];
-  pinElement.querySelector('img').alt = realEstatePin['offer']['title'];
-  return pinElement;
-};
-
-// Функция добавления всех меток в fragment
-var renderPins = function (realEstatesPin) {
-  var fragment = document.createDocumentFragment();
-  for (var j = 0; j < realEstatesPin.length; j++) {
-    var newPinElement = renderPin(realEstatesPin[j]);
-    newPinElement.setAttribute('data-index', j);
-    fragment.appendChild(newPinElement);
-  }
-  return fragment;
-};
-
-// Создаем шаблон для отображения карточки объекта недвижимости
-var cardTemplate = document.querySelector('#card').content.querySelector('.map__card');
-
-// Функция отображения карточки
-var renderCard = function (realEstateCard) {
-  var cardElement = cardTemplate.cloneNode(true);
-  var closePopup = cardElement.querySelector('.popup__close');
-  cardElement.querySelector('.popup__title').textContent = realEstateCard['offer']['title'];
-  cardElement.querySelector('.popup__text--address').textContent = realEstateCard['offer']['address'];
-  cardElement.querySelector('.popup__text--price').innerHTML = realEstateCard['offer']['price'] + '&#x20bd;' + '<span>/ночь</span>';
-  cardElement.querySelector('.popup__type').textContent = typeResidence[realEstateCard['offer']['type']];
-  cardElement.querySelector('.popup__text--capacity').textContent = realEstateCard['offer']['rooms'] + ' комнаты для ' + realEstateCard['offer']['guests'] + ' гостей';
-  cardElement.querySelector('.popup__text--time').textContent = 'Заезд после ' + realEstateCard['offer']['checkin'] + ', выездо до ' + realEstateCard['offer']['checkout'];
-  // В разметке находим блок предоставления услуг
-  var popupFeatures = cardElement.querySelector('.popup__features');
-  // Удаляем все виды услуг из разметки
-  while (popupFeatures.firstChild) {
-    popupFeatures.removeChild(popupFeatures.firstChild);
-  }
-  // Добавляем нужные услуги в разметку
-  for (var i = 0; i < realEstateCard['offer']['features'].length; i++) {
-    var elementFeature = document.createElement('li');
-    elementFeature.className = 'popup__feature popup__feature--' + realEstateCard['offer']['features'][i];
-    popupFeatures.appendChild(elementFeature);
-  }
-  cardElement.querySelector('.popup__description').textContent = realEstateCard['offer']['description'];
-  // Добавляем фотографии в карточку объекта недвижимости
-  var popupPhotos = cardElement.querySelector('.popup__photos');
-  for (var j = 0; j < realEstateCard['offer']['photos'].length; j++) {
-    var popupPhoto = popupPhotos.querySelector('img').cloneNode(true);
-    popupPhoto.src = realEstateCard['offer']['photos'][j];
-    popupPhotos.appendChild(popupPhoto);
-  }
-  popupPhotos.removeChild(popupPhotos.children[0]);
-  cardElement.querySelector('.popup__avatar').src = realEstateCard['author']['avatar'];
-  closePopup.addEventListener('click', function () {
-    cardElement.classList.add('hidden');
-  });
-  return cardElement;
-};
 
 var formAd = document.querySelector('.ad-form');
 var formFilters = document.querySelector('.map__filters');
@@ -111,17 +31,6 @@ var showCoordinatesMapPin = function (pin, drag) {
 // Изначальные координаты метки
 formAd.querySelector('#address').setAttribute('value', showCoordinatesMapPin(mapPin, false));
 
-// Функция блокировки/разблокировки полей формы
-var blockingFormFields = function (block) {
-  formAd.classList.toggle('ad-form--disabled');
-  for (var j = 0; j < formAd.children.length; j++) {
-    if (!block) {
-      formAd.children[j].removeAttribute('disabled');
-    } else {
-      formAd.children[j].setAttribute('disabled', 'disabled');
-    }
-  }
-};
 
 var buttonMouseDownHandlerCreatePins = function (evtDoc) {
   evtDoc.preventDefault();
@@ -155,7 +64,7 @@ var buttonResetClickHandler = function (evtReset) {
   for (var j = 0; j < realEstates.length; j++) {
     blockPins.removeChild(blockPins.lastChild);
   }
-  mapPin.style.left = String(BEGIN_PIN_MAIN_COORIDNATE_X + 'px');
+  mapPin.style.left = String(BEGIN_PIN_MAIN_COORDINATE_X + 'px');
   mapPin.style.top = String(BEGIN_PIN_MAIN_COORDINATE_Y + 'px');
   // Изначальные координаты метки
   formAd.querySelector('#address').setAttribute('value', showCoordinatesMapPin(mapPin, false));
@@ -238,75 +147,3 @@ mapAdverts.addEventListener('click', function (evt) {
     mapAdverts.insertBefore(renderCard(realEstates[target.dataset.index]), mapAdverts.children[1]);
   }
 });
-
-// Функция валидации соответствия: вид жительста - минимальная цена
-//     «Бунгало» — минимальная цена за ночь 0;
-//     «Квартира» — минимальная цена за ночь 1 000;
-//     «Дом» — минимальная цена 5 000;
-//     «Дворец» — минимальная цена 10 000;
-// Вместе с минимальным значением цены нужно изменять и плейсхолдер.
-var typeOfHouse = document.querySelector('#type');
-var inputPrice = document.querySelector('#price');
-// Обработка первоначального значения формы
-inputPrice.setAttribute('min', typeResidencePrice[typeOfHouse.options[typeOfHouse.selectedIndex].value]);
-inputPrice.setAttribute('placeholder', typeResidencePrice[typeOfHouse.options[typeOfHouse.selectedIndex].value]);
-
-typeOfHouse.addEventListener('change', function (evt) {
-  inputPrice.setAttribute('min', typeResidencePrice[typeOfHouse.options[evt.currentTarget.selectedIndex].value]);
-  inputPrice.setAttribute('placeholder', typeResidencePrice[typeOfHouse.options[evt.currentTarget.selectedIndex].value]);
-});
-
-// Валидация полей заезды и выезда
-// Поля «Время заезда» и «Время выезда» синхронизированы:
-// при изменении значения одного поля, во втором выделяется соответствующее ему.
-// Например, если время заезда указано «после 14», то время выезда будет равно «до 14» и наоборот.
-//
-// 1. Обработка события на каждом поле
-// 2. Если одно поле принимает определенное значение, то и другое поле, послы выбора значения, принимает тоже значение
-var timeIn = document.querySelector('#timein');
-var timeOut = document.querySelector('#timeout');
-var validationTime = function (evt) {
-  if (evt.currentTarget.name === 'timeout') {
-    timeIn.options.selectedIndex = timeOut.options.selectedIndex;
-  } else {
-    timeOut.options.selectedIndex = timeIn.options.selectedIndex;
-  }
-};
-
-timeIn.addEventListener('change', validationTime, false);
-timeOut.addEventListener('change', validationTime, false);
-
-// Функция валидации соответствия: полей "вид жительства" - "кол-во комнат".
-//     1 комната — «для 1 гостя»;
-//     2 комнаты — «для 2 гостей» или «для 1 гостя»;
-//     3 комнаты — «для 3 гостей», «для 2 гостей» или «для 1 гостя»;
-//     100 комнат — «не для гостей»;
-var roomNumber = document.querySelector('#room_number');
-var capacity = document.querySelector('#capacity');
-
-var validationGuestsInRoom = function (evt) {
-  // Сразу записываем сообщения об несоответствии комнат и гостей, в дальнейшем эти значения примут истинные значения
-  roomNumber.setCustomValidity(MESSAGE_ERROR_VALIDATION);
-  capacity.setCustomValidity(MESSAGE_ERROR_VALIDATION);
-  var expressionMaxRooms = (Number(roomNumber.options[roomNumber.selectedIndex].value) === MAX_ROOMS);
-  var expressionMagGuests = (Number(capacity.options[capacity.selectedIndex].value) === MAX_GUESTS);
-  // Записываем значения условия в переменную (здесь условие, проверяющие, что нету не стандартных значений в комнатах и кол-ве гостей
-  var expressionWithoutMaxValue = ((!expressionMaxRooms) && (!expressionMagGuests));
-  // Здесь условие, что выбраны именно не стандартные значения комнат и гостей: 100 и 0;
-  var expressionWithMaxValue = (expressionMagGuests && expressionMaxRooms);
-  // Переменная, которая хранит условие проверки соответсвия гостей - комнатам, либо комнат - гостям.
-  var currentExpressionCondition = (roomNumber.options[roomNumber.selectedIndex].value >= capacity.options[capacity.selectedIndex].value);
-  if ((Boolean(evt)) && (evt.currentTarget.name === 'capacity')) {
-    currentExpressionCondition = (capacity.options[capacity.selectedIndex].value <= roomNumber.options[roomNumber.selectedIndex].value);
-  }
-  // Основная проверка соответствия комнат гостям
-  if ((expressionWithoutMaxValue && currentExpressionCondition) || (expressionWithMaxValue)) {
-    roomNumber.setCustomValidity('');
-    capacity.setCustomValidity('');
-  }
-};
-
-validationGuestsInRoom(false);
-roomNumber.addEventListener('change', validationGuestsInRoom, false);
-capacity.addEventListener('change', validationGuestsInRoom, false);
-
