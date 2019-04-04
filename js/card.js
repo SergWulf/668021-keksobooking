@@ -41,4 +41,9 @@
     });
     return cardElement;
   };
+
+  // Экспорт функции
+  window.card = {
+    renderCard: renderCard
+  };
 })();

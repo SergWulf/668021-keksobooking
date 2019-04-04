@@ -20,10 +20,21 @@
   var MIN_COORDINATE_X = 0 + COORDINATE_PIN_X;
   var MAX_COORDINATE_X = document.querySelector('.map').clientWidth - COORDINATE_PIN_X;
 
+  // Начальные координаты главной метки
+  var BEGIN_PIN_MAIN_COORDINATE_X = 570;
+  var BEGIN_PIN_MAIN_COORDINATE_Y = 370;
+  var COORDINATE_HALF_PIN_MAIN_X_Y = 31;
+  var HEIGHT_PIN_MAIN = 82;
+  var WIDTH_PIN_MAIN = 62;
+
+  // DOM объекты формы, фильтра, карты, метки
+  var formAd = document.querySelector('.ad-form');
+  var formFilters = document.querySelector('.map__filters');
   var mapAdverts = document.querySelector('.map');
   var mapPin = document.querySelector('.map__pin--main');
-  var realEstates = [];
 
+  // Массив объектов недвижимости
+  var realEstates = [];
   var titlesResidence = [
     'Большая уютная квартира',
     'Маленькая неуютная квартира',
@@ -138,8 +149,19 @@
   // Экспорт переменных для других модулей
   window.data = {
     realEstates: realEstates,
+    MIN_MAP_Y: MIN_MAP_Y,
+    MAX_MAP_Y: MAX_MAP_Y,
     COORDINATE_PIN_X: COORDINATE_PIN_X,
     COORDINATE_PIN_Y: COORDINATE_PIN_Y,
-    typeResidence: typeResidence
+    COORDINATE_HALF_PIN_MAIN_X_Y: COORDINATE_HALF_PIN_MAIN_X_Y,
+    HEIGHT_PIN_MAIN: HEIGHT_PIN_MAIN,
+    WIDTH_PIN_MAIN: WIDTH_PIN_MAIN,
+    BEGIN_PIN_MAIN_COORDINATE_X: BEGIN_PIN_MAIN_COORDINATE_X,
+    BEGIN_PIN_MAIN_COORDINATE_Y: BEGIN_PIN_MAIN_COORDINATE_Y,
+    typeResidence: typeResidence,
+    formAd: formAd,
+    formFilters: formFilters,
+    mapAdverts: mapAdverts,
+    mapPin: mapPin
   };
 })();

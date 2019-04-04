@@ -25,4 +25,9 @@
     }
     return fragment;
   };
+
+  // Экспорт функции
+  window.pin = {
+    renderPins: renderPins
+  };
 })();
